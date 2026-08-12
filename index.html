@@ -111,12 +111,15 @@
             <strong>1 000 000 F</strong>
 
             <div class="mini-progress">
-                <div class="mini-progress-fill"></div>
+               <div
+    class="mini-progress-fill"
+    id="sidebarGoalProgress"
+></div>
             </div>
 
-            <div class="goal-percentage">
-                25,5 %
-            </div>
+            <div class="goal-percentage" id="sidebarGoalPercent">
+    0 %
+</div>
 
         </div>
 
@@ -202,9 +205,9 @@
     0 F
 </strong>
 
-                    <span class="card-change positive">
-                        +12,4 %
-                    </span>
+                    <span class="card-change positive" id="incomeChange">
+    —
+</span>
 
                 </div>
 
@@ -222,9 +225,9 @@
     0 F
 </strong>
 
-                    <span class="card-change negative">
-                        -5,2 %
-                    </span>
+                    <span class="card-change negative" id="expenseChange">
+    —
+</span>
 
                 </div>
 
@@ -242,9 +245,9 @@
     0 F
 </strong>
 
-                    <span class="card-change positive">
-                        30 %
-                    </span>
+                    <span class="card-change positive" id="savingRate">
+    —
+</span>
 
                 </div>
 
@@ -262,9 +265,9 @@
     0 F
 </strong>
 
-                    <span class="card-change neutral">
-                        Disponible
-                    </span>
+                    <span class="card-change neutral" id="balanceStatus">
+    —
+</span>
 
                 </div>
 
@@ -293,16 +296,19 @@
                         </p>
                     </div>
 
-                    <div class="goal-percent">
-                        25,5 %
-                    </div>
+                    <div class="goal-percent" id="goalPercent">
+    0 %
+</div>
 
                 </div>
 
 
                 <div class="large-progress">
 
-                    <div class="large-progress-fill"></div>
+                   <div
+    class="large-progress-fill"
+    id="goalProgressBar"
+></div>
 
                 </div>
 
@@ -311,17 +317,23 @@
 
                     <div>
                         <span>Épargne actuelle</span>
-                        <strong>255 000 F</strong>
+                        <strong id="goalSaved">
+    0 F
+</strong>
                     </div>
 
                     <div>
                         <span>Montant restant</span>
-                        <strong>745 000 F</strong>
+                        <strong id="goalRemaining">
+    1 000 000 F
+</strong>
                     </div>
 
                     <div>
                         <span>Moyenne / semaine</span>
-                        <strong>8 500 F</strong>
+                        <strong id="weeklyAverage">
+    —
+</strong>
                     </div>
 
                 </div>
@@ -418,49 +430,48 @@
                     </div>
 
 
-                    <div class="score-circle">
+                   <div class="score-circle">
 
-                        <div>
-                            <strong>78</strong>
-                            <span>/100</span>
-                        </div>
+    <div>
+        <strong id="financialScore">—</strong>
+        <span>/100</span>
+    </div>
 
-                    </div>
+</div>
+
+<div class="score-status" id="scoreStatus">
+    Pas encore assez de données
+</div>
 
 
-                    <div class="score-status">
-                        Bonne gestion
-                    </div>
+               <div class="score-details">
 
+    <div>
+        <span>Épargne</span>
+        <strong id="scoreSavings">—</strong>
+    </div>
 
-                    <div class="score-details">
+    <div>
+        <span>Dépenses</span>
+        <strong id="scoreExpenses">—</strong>
+    </div>
 
-                        <div>
-                            <span>Épargne</span>
-                            <strong>82</strong>
-                        </div>
+    <div>
+        <span>Business</span>
+        <strong id="scoreBusiness">—</strong>
+    </div>
 
-                        <div>
-                            <span>Dépenses</span>
-                            <strong>71</strong>
-                        </div>
+    <div>
+        <span>Trading</span>
+        <strong id="scoreTrading">—</strong>
+    </div>
 
-                        <div>
-                            <span>Business</span>
-                            <strong>79</strong>
-                        </div>
+    <div>
+        <span>Régularité</span>
+        <strong id="scoreRegularity">—</strong>
+    </div>
 
-                        <div>
-                            <span>Trading</span>
-                            <strong>68</strong>
-                        </div>
-
-                        <div>
-                            <span>Régularité</span>
-                            <strong>86</strong>
-                        </div>
-
-                    </div>
+</div>
 
                 </div>
 
@@ -488,68 +499,30 @@
                 </div>
 
 
-                <div class="alert-list">
+               <div class="alert-list" id="alertList">
 
-                    <div class="alert-item danger">
+    <div class="alert-item success">
 
-                        <div class="alert-icon">
-                            !
-                        </div>
+        <div class="alert-icon">
+            ✓
+        </div>
 
-                        <div>
-                            <strong>
-                                Objectif d'épargne manqué
-                            </strong>
+        <div>
 
-                            <p>
-                                Tu devais épargner 6 000 F cette semaine.
-                                Il manque actuellement 2 500 F.
-                            </p>
-                        </div>
+            <strong>
+                Aucune alerte
+            </strong>
 
-                    </div>
+            <p>
+                Les alertes apparaîtront automatiquement
+                lorsque suffisamment de données seront disponibles.
+            </p>
 
+        </div>
 
-                    <div class="alert-item success">
+    </div>
 
-                        <div class="alert-icon">
-                            ✓
-                        </div>
-
-                        <div>
-                            <strong>
-                                Bonne progression
-                            </strong>
-
-                            <p>
-                                Ton taux d'épargne moyen est actuellement de 30 %.
-                            </p>
-                        </div>
-
-                    </div>
-
-
-                    <div class="alert-item warning">
-
-                        <div class="alert-icon">
-                            !
-                        </div>
-
-                        <div>
-                            <strong>
-                                Trading à surveiller
-                            </strong>
-
-                            <p>
-                                Les dépenses liées au trading augmentent cette semaine.
-                            </p>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
+</div>
 
 
             <!-- =========================
