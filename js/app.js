@@ -143,3 +143,217 @@ function updateDashboard() {
     });
 
 }
+
+/* =========================================
+   MODAL AJOUTER UNE ENTRÉE
+========================================= */
+
+const incomeModal = document.getElementById("incomeModal");
+
+const incomeForm = document.getElementById("incomeForm");
+
+const closeIncomeModal =
+    document.getElementById("closeIncomeModal");
+
+const cancelIncome =
+    document.getElementById("cancelIncome");
+
+const incomeAmount =
+    document.getElementById("incomeAmount");
+
+const incomeDate =
+    document.getElementById("incomeDate");
+
+const savingPreview =
+    document.getElementById("savingPreview");
+
+
+/* OUVRIR LA FENÊTRE */
+
+function openIncomeModal() {
+
+    incomeModal.classList.add("show");
+
+    incomeAmount.focus();
+
+}
+
+
+/* FERMER */
+
+function closeIncomeModalFunction() {
+
+    incomeModal.classList.remove("show");
+
+}
+
+
+/* BOUTONS SIDEBAR */
+
+document.querySelectorAll(".nav-item").forEach(item => {
+
+    const text = item.textContent.trim();
+
+    if (text.includes("Ajouter une entrée")) {
+
+        item.addEventListener("click", event => {
+
+            event.preventDefault();
+
+            openIncomeModal();
+
+        });
+
+    }
+
+});
+
+
+/* ACTION RAPIDE */
+
+document.querySelectorAll(".quick-action").forEach(button => {
+
+    const text = button.textContent;
+
+    if (text.includes("Ajouter une entrée")) {
+
+        button.addEventListener("click", () => {
+
+            openIncomeModal();
+
+        });
+
+    }
+
+});
+
+
+/* FERMETURE */
+
+closeIncomeModal.addEventListener(
+    "click",
+    closeIncomeModalFunction
+);
+
+
+cancelIncome.addEventListener(
+    "click",
+    closeIncomeModalFunction
+);
+
+
+/* CLIQUER EN DEHORS */
+
+incomeModal.addEventListener("click", event => {
+
+    if (event.target === incomeModal) {
+
+        closeIncomeModalFunction();
+
+    }
+
+});
+
+
+/* =========================================
+   DATE PAR DÉFAUT
+========================================= */
+
+const today = new Date();
+
+const formattedDate =
+    today.toISOString().split("T")[0];
+
+incomeDate.value = formattedDate;
+
+
+/* =========================================
+   CALCUL ÉPARGNE RECOMMANDÉE
+========================================= */
+
+incomeAmount.addEventListener("input", () => {
+
+    const amount =
+        Number(incomeAmount.value) || 0;
+
+    const recommendation =
+        getSavingsRecommendation(amount);
+
+    savingPreview.querySelector("strong").textContent =
+        recommendation.toLocaleString("fr-FR") + " F";
+
+});
+
+
+/* =========================================
+   ENREGISTREMENT
+========================================= */
+
+incomeForm.addEventListener("submit", event => {
+
+    event.preventDefault();
+
+
+    const amount =
+        Number(incomeAmount.value);
+
+    const source =
+        document.getElementById("incomeSource").value.trim();
+
+    const category =
+        document.getElementById("incomeCategory").value;
+
+    const date =
+        incomeDate.value;
+
+    const note =
+        document.getElementById("incomeNote").value.trim();
+
+
+    if (!amount || amount <= 0) {
+
+        alert("Veuillez entrer un montant valide.");
+
+        return;
+
+    }
+
+
+    const transaction = addIncome({
+
+        amount,
+
+        source,
+
+        category,
+
+        date,
+
+        note
+
+    });
+
+
+    console.log(
+        "Nouvelle entrée enregistrée :",
+        transaction
+    );
+
+
+    alert(
+        "Entrée de " +
+        amount.toLocaleString("fr-FR") +
+        " F enregistrée avec succès."
+    );
+
+
+    incomeForm.reset();
+
+    incomeDate.value = formattedDate;
+
+    savingPreview.querySelector("strong").textContent =
+        "0 F";
+
+    closeIncomeModalFunction();
+
+});
