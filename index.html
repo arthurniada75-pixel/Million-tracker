@@ -3,12 +3,636 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Million Tracker</title>
+
+    <title>Million Tracker | Dashboard</title>
+
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
 
-    <h1>Million Tracker</h1>
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">M</div>
+
+            <div>
+                <h1>MILLION</h1>
+                <span>TRACKER</span>
+            </div>
+        </div>
+
+
+        <nav class="navigation">
+
+            <div class="nav-section">
+                <span class="section-title">PRINCIPAL</span>
+
+                <a href="#" class="nav-item active">
+                    <span class="nav-icon">◉</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">＋</span>
+                    <span>Ajouter une entrée</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">−</span>
+                    <span>Ajouter une dépense</span>
+                </a>
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="section-title">FINANCES</span>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">◈</span>
+                    <span>Épargne</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">◇</span>
+                    <span>Trading</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">▣</span>
+                    <span>Statistiques</span>
+                </a>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="section-title">OBJECTIF</span>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">◎</span>
+                    <span>Objectif 1M</span>
+                </a>
+
+            </div>
+
+
+            <div class="nav-section">
+
+                <span class="section-title">DONNÉES</span>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">≡</span>
+                    <span>Historique</span>
+                </a>
+
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">⚙</span>
+                    <span>Paramètres</span>
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <!-- OBJECTIF SIDEBAR -->
+
+        <div class="sidebar-goal">
+
+            <span class="goal-label">OBJECTIF</span>
+
+            <strong>1 000 000 F</strong>
+
+            <div class="mini-progress">
+                <div class="mini-progress-fill"></div>
+            </div>
+
+            <div class="goal-percentage">
+                25,5 %
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================
+         CONTENU PRINCIPAL
+    ========================== -->
+
+    <main class="main-content">
+
+        <!-- HEADER -->
+
+        <header class="topbar">
+
+            <div class="mobile-menu">
+                ☰
+            </div>
+
+            <div class="topbar-spacer"></div>
+
+            <button class="notification-button">
+                🔔
+            </button>
+
+            <div class="profile">
+                <div class="profile-avatar">
+                    A
+                </div>
+
+                <div class="profile-info">
+                    <strong>Arthur</strong>
+                    <span>Administrateur</span>
+                </div>
+            </div>
+
+        </header>
+
+
+        <!-- DASHBOARD -->
+
+        <section class="dashboard">
+
+            <div class="page-heading">
+
+                <div>
+                    <span class="eyebrow">TABLEAU DE BORD</span>
+
+                    <h2>
+                        Bonjour Arthur
+                    </h2>
+
+                    <p>
+                        Voici l'état actuel de tes finances.
+                    </p>
+                </div>
+
+                <div class="date-box">
+                    <span>Aujourd'hui</span>
+                    <strong>12 AOÛT 2026</strong>
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 CARTES FINANCIÈRES
+            ========================== -->
+
+            <div class="financial-cards">
+
+                <div class="financial-card">
+
+                    <div class="card-header">
+                        <span>REVENUS</span>
+                        <div class="card-icon green">
+                            ↑
+                        </div>
+                    </div>
+
+                    <strong class="card-value">
+                        85 000 F
+                    </strong>
+
+                    <span class="card-change positive">
+                        +12,4 %
+                    </span>
+
+                </div>
+
+
+                <div class="financial-card">
+
+                    <div class="card-header">
+                        <span>DÉPENSES</span>
+                        <div class="card-icon red">
+                            ↓
+                        </div>
+                    </div>
+
+                    <strong class="card-value">
+                        42 000 F
+                    </strong>
+
+                    <span class="card-change negative">
+                        -5,2 %
+                    </span>
+
+                </div>
+
+
+                <div class="financial-card">
+
+                    <div class="card-header">
+                        <span>ÉPARGNE</span>
+                        <div class="card-icon green">
+                            ◈
+                        </div>
+                    </div>
+
+                    <strong class="card-value">
+                        25 500 F
+                    </strong>
+
+                    <span class="card-change positive">
+                        30 %
+                    </span>
+
+                </div>
+
+
+                <div class="financial-card">
+
+                    <div class="card-header">
+                        <span>SOLDE DISPONIBLE</span>
+                        <div class="card-icon green">
+                            =
+                        </div>
+                    </div>
+
+                    <strong class="card-value">
+                        17 500 F
+                    </strong>
+
+                    <span class="card-change neutral">
+                        Disponible
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 OBJECTIF 1 MILLION
+            ========================== -->
+
+            <div class="goal-card">
+
+                <div class="goal-card-top">
+
+                    <div>
+                        <span class="eyebrow">
+                            OBJECTIF FINANCIER
+                        </span>
+
+                        <h3>
+                            1 000 000 F
+                        </h3>
+
+                        <p>
+                            Construire progressivement ton premier million.
+                        </p>
+                    </div>
+
+                    <div class="goal-percent">
+                        25,5 %
+                    </div>
+
+                </div>
+
+
+                <div class="large-progress">
+
+                    <div class="large-progress-fill"></div>
+
+                </div>
+
+
+                <div class="goal-stats">
+
+                    <div>
+                        <span>Épargne actuelle</span>
+                        <strong>255 000 F</strong>
+                    </div>
+
+                    <div>
+                        <span>Montant restant</span>
+                        <strong>745 000 F</strong>
+                    </div>
+
+                    <div>
+                        <span>Moyenne / semaine</span>
+                        <strong>8 500 F</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 GRAPHIQUE + SCORE
+            ========================== -->
+
+            <div class="dashboard-grid">
+
+                <div class="chart-card">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="eyebrow">
+                                ANALYSE
+                            </span>
+
+                            <h3>
+                                Évolution financière
+                            </h3>
+                        </div>
+
+                        <div class="period-buttons">
+
+                            <button>7J</button>
+                            <button class="selected">30J</button>
+                            <button>3M</button>
+                            <button>6M</button>
+                            <button>1AN</button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-placeholder">
+
+                        <div class="chart-line"></div>
+
+                        <div class="chart-labels">
+                            <span>1</span>
+                            <span>2</span>
+                            <span>3</span>
+                            <span>4</span>
+                            <span>5</span>
+                            <span>6</span>
+                        </div>
+
+                    </div>
+
+                    <div class="chart-legend">
+
+                        <span>
+                            <i class="legend-green"></i>
+                            Revenus
+                        </span>
+
+                        <span>
+                            <i class="legend-red"></i>
+                            Dépenses
+                        </span>
+
+                        <span>
+                            <i class="legend-light"></i>
+                            Épargne
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SCORE -->
+
+                <div class="score-card">
+
+                    <div class="panel-header">
+
+                        <div>
+                            <span class="eyebrow">
+                                PERFORMANCE
+                            </span>
+
+                            <h3>
+                                Score financier
+                            </h3>
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-circle">
+
+                        <div>
+                            <strong>78</strong>
+                            <span>/100</span>
+                        </div>
+
+                    </div>
+
+
+                    <div class="score-status">
+                        Bonne gestion
+                    </div>
+
+
+                    <div class="score-details">
+
+                        <div>
+                            <span>Épargne</span>
+                            <strong>82</strong>
+                        </div>
+
+                        <div>
+                            <span>Dépenses</span>
+                            <strong>71</strong>
+                        </div>
+
+                        <div>
+                            <span>Business</span>
+                            <strong>79</strong>
+                        </div>
+
+                        <div>
+                            <span>Trading</span>
+                            <strong>68</strong>
+                        </div>
+
+                        <div>
+                            <span>Régularité</span>
+                            <strong>86</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 ALERTES
+            ========================== -->
+
+            <div class="alerts-card">
+
+                <div class="panel-header">
+
+                    <div>
+                        <span class="eyebrow">
+                            SURVEILLANCE
+                        </span>
+
+                        <h3>
+                            À surveiller
+                        </h3>
+                    </div>
+
+                </div>
+
+
+                <div class="alert-list">
+
+                    <div class="alert-item danger">
+
+                        <div class="alert-icon">
+                            !
+                        </div>
+
+                        <div>
+                            <strong>
+                                Objectif d'épargne manqué
+                            </strong>
+
+                            <p>
+                                Tu devais épargner 6 000 F cette semaine.
+                                Il manque actuellement 2 500 F.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert-item success">
+
+                        <div class="alert-icon">
+                            ✓
+                        </div>
+
+                        <div>
+                            <strong>
+                                Bonne progression
+                            </strong>
+
+                            <p>
+                                Ton taux d'épargne moyen est actuellement de 30 %.
+                            </p>
+                        </div>
+
+                    </div>
+
+
+                    <div class="alert-item warning">
+
+                        <div class="alert-icon">
+                            !
+                        </div>
+
+                        <div>
+                            <strong>
+                                Trading à surveiller
+                            </strong>
+
+                            <p>
+                                Les dépenses liées au trading augmentent cette semaine.
+                            </p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 ACTIONS RAPIDES
+            ========================== -->
+
+            <div class="quick-actions">
+
+                <button class="quick-action green-action">
+
+                    <span>＋</span>
+
+                    <div>
+                        <strong>
+                            Ajouter une entrée
+                        </strong>
+
+                        <small>
+                            Enregistrer un revenu
+                        </small>
+                    </div>
+
+                </button>
+
+
+                <button class="quick-action red-action">
+
+                    <span>−</span>
+
+                    <div>
+                        <strong>
+                            Ajouter une dépense
+                        </strong>
+
+                        <small>
+                            Enregistrer une sortie
+                        </small>
+                    </div>
+
+                </button>
+
+
+                <button class="quick-action">
+
+                    <span>◈</span>
+
+                    <div>
+                        <strong>
+                            Ajouter une épargne
+                        </strong>
+
+                        <small>
+                            Mettre à jour ton objectif
+                        </small>
+                    </div>
+
+                </button>
+
+
+                <button class="quick-action">
+
+                    <span>◇</span>
+
+                    <div>
+                        <strong>
+                            Opération trading
+                        </strong>
+
+                        <small>
+                            Gain ou perte
+                        </small>
+                    </div>
+
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="js/app.js"></script>
 
 </body>
 </html>
