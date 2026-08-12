@@ -125,6 +125,13 @@ document.addEventListener("DOMContentLoaded", () => {
    DASHBOARD
 ========================================= */
 
+function formatMoney(amount) {
+
+    return Number(amount).toLocaleString("fr-FR") + " F";
+
+}
+
+
 function updateDashboard() {
 
     const income = getTotalIncome();
@@ -135,11 +142,62 @@ function updateDashboard() {
 
     const balance = getBalance();
 
+
+    const incomeElement =
+        document.getElementById("totalIncome");
+
+    const expensesElement =
+        document.getElementById("totalExpenses");
+
+    const savingsElement =
+        document.getElementById("totalSavings");
+
+    const balanceElement =
+        document.getElementById("currentBalance");
+
+
+    if (incomeElement) {
+
+        incomeElement.textContent =
+            formatMoney(income);
+
+    }
+
+
+    if (expensesElement) {
+
+        expensesElement.textContent =
+            formatMoney(expenses);
+
+    }
+
+
+    if (savingsElement) {
+
+        savingsElement.textContent =
+            formatMoney(savings);
+
+    }
+
+
+    if (balanceElement) {
+
+        balanceElement.textContent =
+            formatMoney(balance);
+
+    }
+
+
     console.log({
+
         revenus: income,
+
         dépenses: expenses,
+
         épargne: savings,
+
         solde: balance
+
     });
 
 }
