@@ -1520,3 +1520,385 @@ body {
         font-size: 24px;
     }
 }
+
+/* =========================================
+   MODAL
+========================================= */
+
+.modal-overlay {
+
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.78);
+
+    backdrop-filter: blur(8px);
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+
+    z-index: 1000;
+}
+
+
+.modal-overlay.show {
+
+    display: flex;
+
+    animation: modalFadeIn 0.2s ease;
+}
+
+
+@keyframes modalFadeIn {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+}
+
+
+.modal {
+
+    position: relative;
+
+    width: 100%;
+
+    max-width: 500px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    background: #0d100f;
+
+    border: 1px solid #26382e;
+
+    border-radius: 16px;
+
+    padding: 28px;
+
+    box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.6);
+}
+
+
+.modal-close {
+
+    position: absolute;
+
+    top: 17px;
+    right: 17px;
+
+    width: 32px;
+    height: 32px;
+
+    border-radius: 8px;
+
+    border: 1px solid var(--border);
+
+    background: transparent;
+
+    color: var(--muted);
+
+    font-size: 20px;
+
+    cursor: pointer;
+}
+
+
+.modal-close:hover {
+
+    color: var(--white);
+
+    border-color: var(--green);
+}
+
+
+.modal-header {
+
+    margin-bottom: 25px;
+
+    padding-right: 35px;
+}
+
+
+.modal-header h2 {
+
+    color: var(--white);
+
+    font-size: 23px;
+
+    margin-bottom: 6px;
+}
+
+
+.modal-header p {
+
+    color: var(--muted);
+
+    font-size: 11px;
+
+    line-height: 1.5;
+}
+
+
+/* FORM */
+
+.form-group {
+
+    margin-bottom: 17px;
+}
+
+
+.form-group label {
+
+    display: block;
+
+    color: var(--text);
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    margin-bottom: 7px;
+}
+
+
+.form-group label span {
+
+    color: var(--muted);
+
+    font-weight: normal;
+}
+
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+
+    width: 100%;
+
+    background: #080a0a;
+
+    border: 1px solid var(--border);
+
+    border-radius: 9px;
+
+    color: var(--white);
+
+    padding: 12px;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    outline: none;
+
+    transition: var(--transition);
+}
+
+
+.form-group textarea {
+
+    resize: vertical;
+}
+
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+
+    border-color: var(--green);
+
+    box-shadow:
+        0 0 0 3px rgba(0, 230, 118, 0.06);
+}
+
+
+.form-group select option {
+
+    background: #0d100f;
+
+    color: var(--white);
+}
+
+
+/* MONTANT */
+
+.amount-input {
+
+    position: relative;
+}
+
+
+.amount-input input {
+
+    padding-right: 65px;
+}
+
+
+.amount-input span {
+
+    position: absolute;
+
+    right: 13px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--green);
+
+    font-size: 9px;
+
+    font-weight: 700;
+}
+
+
+/* ÉPARGNE RECOMMANDÉE */
+
+.saving-preview {
+
+    padding: 14px;
+
+    background: rgba(0, 230, 118, 0.045);
+
+    border: 1px solid rgba(0, 230, 118, 0.14);
+
+    border-radius: 10px;
+
+    margin-top: 5px;
+
+    margin-bottom: 20px;
+}
+
+
+.saving-preview span {
+
+    display: block;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    margin-bottom: 5px;
+}
+
+
+.saving-preview strong {
+
+    display: block;
+
+    color: var(--green);
+
+    font-size: 19px;
+
+    margin-bottom: 3px;
+}
+
+
+.saving-preview small {
+
+    color: var(--muted);
+
+    font-size: 8px;
+}
+
+
+/* BOUTONS */
+
+.form-actions {
+
+    display: flex;
+
+    gap: 10px;
+
+    justify-content: flex-end;
+}
+
+
+.cancel-button,
+.submit-button {
+
+    padding: 11px 17px;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+
+.cancel-button {
+
+    background: transparent;
+
+    border: 1px solid var(--border);
+
+    color: var(--muted);
+}
+
+
+.cancel-button:hover {
+
+    color: var(--white);
+
+    border-color: #34453c;
+}
+
+
+.submit-button {
+
+    background: var(--green);
+
+    border: 1px solid var(--green);
+
+    color: #031009;
+}
+
+
+.submit-button:hover {
+
+    background: var(--green-soft);
+
+    box-shadow:
+        0 0 20px rgba(0, 230, 118, 0.18);
+}
+
+
+@media (max-width: 500px) {
+
+    .modal {
+
+        padding: 22px;
+
+        border-radius: 13px;
+    }
+
+    .form-actions {
+
+        flex-direction: column-reverse;
+    }
+
+    .cancel-button,
+    .submit-button {
+
+        width: 100%;
+    }
+
+}
