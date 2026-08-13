@@ -118,8 +118,123 @@ document.addEventListener("DOMContentLoaded", () => {
 
     updateDashboard();
 
+    initializeExpenseModal();
+
 });
 
+
+/* =========================================
+   MODAL AJOUTER UNE DÉPENSE
+========================================= */
+
+function initializeExpenseModal() {
+
+    const modal =
+        document.getElementById("expenseModal");
+
+    const openButton =
+        document.getElementById("openExpenseModal");
+
+    const closeButton =
+        document.getElementById("closeExpenseModal");
+
+    const cancelButton =
+        document.getElementById("cancelExpense");
+
+
+    /*
+       Vérification
+    */
+
+    if (!modal || !openButton) {
+
+        console.error(
+            "Modal dépense introuvable."
+        );
+
+        return;
+
+    }
+
+
+    /*
+       OUVRIR LE MODAL
+    */
+
+    openButton.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            modal.classList.add("active");
+
+        }
+    );
+
+
+    /*
+       FERMER AVEC X
+    */
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
+            "click",
+            function() {
+
+                modal.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+       FERMER AVEC ANNULER
+    */
+
+    if (cancelButton) {
+
+        cancelButton.addEventListener(
+            "click",
+            function() {
+
+                modal.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+       FERMER EN CLIQUANT À L'EXTÉRIEUR
+    */
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === modal
+            ) {
+
+                modal.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+}
 
 /* =========================================
    DASHBOARD
