@@ -2092,6 +2092,8 @@ document.addEventListener(
 
         renderFinancialChart();
 
+        initializeExpenseModal();
+
     }
 );
 
