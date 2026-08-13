@@ -2197,20 +2197,17 @@ function initializeChartPeriods() {
    INITIALISATION GRAPHIQUE
 ========================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-        updateCurrentDate();
+    console.log("Million Tracker chargé.");
 
-        initializeChartPeriods();
+    updateDashboard();
 
-        renderFinancialChart();
+    initializeExpenseModal();
 
-        initializeExpenseModal();
+    initializeHistory();
 
-    }
-);
+});
 
 /* =========================================
    DATE ACTUELLE DU DASHBOARD
@@ -2555,5 +2552,354 @@ function initializeExpenseModal() {
 
         }
     );
+
+}
+
+/* =========================================
+   HISTORIQUE DES TRANSACTIONS
+========================================= */
+
+function renderHistory(filter = "all") {
+
+    const historyList =
+        document.getElementById("historyList");
+
+    const incomeTotal =
+        document.getElementById("historyIncomeTotal");
+
+    const expenseTotal =
+        document.getElementById("historyExpenseTotal");
+
+    const balance =
+        document.getElementById("historyBalance");
+
+
+    if (!historyList) {
+        return;
+    }
+
+
+    /*
+       On utilise uniquement les transactions
+       réellement enregistrées.
+    */
+
+    const transactions =
+        Array.isArray(appData.transactions)
+            ? appData.transactions
+            : [];
+
+
+    /*
+       Calcul des totaux réels
+    */
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+
+    transactions.forEach(transaction => {
+
+        const amount =
+            Number(transaction.amount) || 0;
+
+
+        if (transaction.type === "income") {
+
+            totalIncome += amount;
+
+        }
+
+
+        if (transaction.type === "expense") {
+
+            totalExpense += amount;
+
+        }
+
+    });
+
+
+    /*
+       Mise à jour du résumé
+    */
+
+    if (incomeTotal) {
+
+        incomeTotal.textContent =
+            formatMoney(totalIncome);
+
+    }
+
+
+    if (expenseTotal) {
+
+        expenseTotal.textContent =
+            formatMoney(totalExpense);
+
+    }
+
+
+    if (balance) {
+
+        balance.textContent =
+            formatMoney(
+                totalIncome - totalExpense
+            );
+
+    }
+
+
+    /*
+       Filtrage
+    */
+
+    let filteredTransactions =
+        transactions.filter(transaction => {
+
+            if (filter === "all") {
+                return true;
+            }
+
+            return transaction.type === filter;
+
+        });
+
+
+    /*
+       Plus récentes en premier
+    */
+
+    filteredTransactions.sort(
+        (a, b) => {
+
+            return (
+                new Date(b.date) -
+                new Date(a.date)
+            );
+
+        }
+    );
+
+
+    /*
+       Aucune transaction
+    */
+
+    if (
+        filteredTransactions.length === 0
+    ) {
+
+        historyList.innerHTML = `
+            <div class="history-empty">
+                <strong>Aucune transaction</strong>
+                <span>
+                    Aucune opération enregistrée pour le moment.
+                </span>
+            </div>
+        `;
+
+        return;
+
+    }
+
+
+    /*
+       Affichage des transactions
+    */
+
+    historyList.innerHTML =
+        filteredTransactions.map(
+            transaction => {
+
+                const amount =
+                    Number(transaction.amount) || 0;
+
+
+                const isIncome =
+                    transaction.type === "income";
+
+
+                const typeClass =
+                    isIncome
+                        ? "history-income"
+                        : "history-expense";
+
+
+                const sign =
+                    isIncome ? "+" : "-";
+
+
+                const title =
+                    isIncome
+                        ? (
+                            transaction.source ||
+                            transaction.category ||
+                            "Revenu"
+                        )
+                        : (
+                            transaction.category ||
+                            "Dépense"
+                        );
+
+
+                const description =
+                    transaction.note ||
+                    "";
+
+
+                const formattedDate =
+                    formatHistoryDate(
+                        transaction.date
+                    );
+
+
+                return `
+                    <div class="history-item ${typeClass}">
+
+                        <div class="history-item-info">
+
+                            <strong>
+                                ${escapeHistoryText(title)}
+                            </strong>
+
+                            <span>
+                                ${formattedDate}
+                            </span>
+
+                            ${
+                                description
+                                    ? `
+                                        <small>
+                                            ${escapeHistoryText(description)}
+                                        </small>
+                                      `
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <strong class="history-amount">
+                            ${sign}${formatMoney(amount)}
+                        </strong>
+
+                    </div>
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =========================================
+   FORMATAGE MONÉTAIRE
+========================================= */
+
+function formatMoney(amount) {
+
+    return (
+        Number(amount) || 0
+    ).toLocaleString(
+        "fr-FR"
+    ) + " F";
+
+}
+
+
+/* =========================================
+   FORMATAGE DATE HISTORIQUE
+========================================= */
+
+function formatHistoryDate(dateValue) {
+
+    if (!dateValue) {
+        return "Date inconnue";
+    }
+
+
+    const date =
+        new Date(dateValue);
+
+
+    if (isNaN(date.getTime())) {
+        return dateValue;
+    }
+
+
+    return date.toLocaleDateString(
+        "fr-FR",
+        {
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================
+   PROTECTION DU TEXTE AFFICHÉ
+========================================= */
+
+function escapeHistoryText(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================
+   FILTRES HISTORIQUE
+========================================= */
+
+function initializeHistory() {
+
+    const filterButtons =
+        document.querySelectorAll(
+            ".history-filter"
+        );
+
+
+    filterButtons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            function() {
+
+                filterButtons.forEach(
+                    item => {
+                        item.classList.remove(
+                            "active"
+                        );
+                    }
+                );
+
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                const filter =
+                    this.dataset.historyFilter;
+
+
+                renderHistory(filter);
+
+            }
+        );
+
+    });
+
+
+    renderHistory("all");
 
 }
