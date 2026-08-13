@@ -2127,3 +2127,316 @@ function updateCurrentDate() {
         formattedDate.toUpperCase();
 
 }
+
+/* =========================================
+   AJOUTER UNE DÉPENSE
+========================================= */
+
+function initializeExpenseModal() {
+
+    const modal =
+        document.getElementById("expenseModal");
+
+    const openButton =
+        document.getElementById("openExpenseModal");
+
+    const closeButton =
+        document.getElementById("closeExpenseModal");
+
+    const cancelButton =
+        document.getElementById("cancelExpense");
+
+    const form =
+        document.getElementById("expenseForm");
+
+    const dateInput =
+        document.getElementById("expenseDate");
+
+
+    if (
+        !modal ||
+        !openButton ||
+        !closeButton ||
+        !cancelButton ||
+        !form
+    ) {
+        return;
+    }
+
+
+    /* =========================
+       OUVRIR
+    ========================= */
+
+    openButton.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            modal.classList.add("active");
+
+            /*
+               Date réelle du jour.
+               Aucune date fictive.
+            */
+
+            if (dateInput) {
+
+                const today =
+                    new Date();
+
+                const year =
+                    today.getFullYear();
+
+                const month =
+                    String(
+                        today.getMonth() + 1
+                    ).padStart(2, "0");
+
+                const day =
+                    String(
+                        today.getDate()
+                    ).padStart(2, "0");
+
+                dateInput.value =
+                    `${year}-${month}-${day}`;
+            }
+
+        }
+    );
+
+
+    /* =========================
+       FERMER
+    ========================= */
+
+    function closeExpenseModal() {
+
+        modal.classList.remove("active");
+
+        form.reset();
+
+    }
+
+
+    closeButton.addEventListener(
+        "click",
+        closeExpenseModal
+    );
+
+
+    cancelButton.addEventListener(
+        "click",
+        closeExpenseModal
+    );
+
+
+    /*
+       Fermer en cliquant à l'extérieur
+    */
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === modal
+            ) {
+
+                closeExpenseModal();
+
+            }
+
+        }
+    );
+
+
+    /* =========================
+       ENREGISTRER
+    ========================= */
+
+    form.addEventListener(
+        "submit",
+        function(event) {
+
+            event.preventDefault();
+
+
+            const amount =
+                Number(
+                    document.getElementById(
+                        "expenseAmount"
+                    ).value
+                );
+
+
+            const category =
+                document.getElementById(
+                    "expenseCategory"
+                ).value;
+
+
+            const date =
+                document.getElementById(
+                    "expenseDate"
+                ).value;
+
+
+            const note =
+                document.getElementById(
+                    "expenseNote"
+                ).value.trim();
+
+
+            /*
+               Vérifications
+            */
+
+            if (
+                !amount ||
+                amount <= 0
+            ) {
+
+                alert(
+                    "Entre un montant valide."
+                );
+
+                return;
+
+            }
+
+
+            if (!category) {
+
+                alert(
+                    "Sélectionne une catégorie."
+                );
+
+                return;
+
+            }
+
+
+            if (!date) {
+
+                alert(
+                    "Sélectionne une date."
+                );
+
+                return;
+
+            }
+
+
+            /*
+               Création de la dépense
+            */
+
+            const expense = {
+
+                id:
+                    Date.now(),
+
+                type:
+                    "expense",
+
+                amount:
+                    amount,
+
+                category:
+                    category,
+
+                date:
+                    date,
+
+                note:
+                    note,
+
+                createdAt:
+                    new Date().toISOString()
+
+            };
+
+
+            /*
+               Ajouter aux données existantes
+            */
+
+            if (
+                !Array.isArray(
+                    appData.transactions
+                )
+            ) {
+
+                appData.transactions = [];
+
+            }
+
+
+            appData.transactions.push(
+                expense
+            );
+
+
+            /*
+               Sauvegarder
+            */
+
+            saveAppData();
+
+
+            /*
+               Mettre à jour l'application
+            */
+
+            closeExpenseModal();
+
+
+            /*
+               Rafraîchir les éléments
+               existants du Dashboard
+            */
+
+            if (
+                typeof updateDashboard ===
+                "function"
+            ) {
+
+                updateDashboard();
+
+            }
+
+
+            if (
+                typeof updateFinancialScore ===
+                "function"
+            ) {
+
+                updateFinancialScore();
+
+            }
+
+
+            if (
+                typeof renderFinancialChart ===
+                "function"
+            ) {
+
+                renderFinancialChart();
+
+            }
+
+
+            /*
+               Message de confirmation
+            */
+
+            alert(
+                "Dépense enregistrée."
+            );
+
+        }
+    );
+
+}
