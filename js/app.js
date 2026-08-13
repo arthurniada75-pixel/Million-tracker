@@ -167,7 +167,7 @@ function initializeExpenseModal() {
 
             event.preventDefault();
 
-            modal.classList.add("active");
+            modal.classList.add("show");
 
         }
     );
