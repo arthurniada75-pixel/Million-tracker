@@ -2291,7 +2291,7 @@ function initializeExpenseModal() {
 
             event.preventDefault();
 
-            modal.classList.add("active");
+           modal.classList.add("show");
 
             /*
                Date réelle du jour.
@@ -2330,7 +2330,7 @@ function initializeExpenseModal() {
 
     function closeExpenseModal() {
 
-        modal.classList.remove("active");
+        modal.classList.remove("show");
 
         form.reset();
 
