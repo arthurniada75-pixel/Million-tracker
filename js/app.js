@@ -2086,9 +2086,44 @@ document.addEventListener(
     "DOMContentLoaded",
     () => {
 
+        updateCurrentDate();
+
         initializeChartPeriods();
 
         renderFinancialChart();
 
     }
 );
+
+/* =========================================
+   DATE ACTUELLE DU DASHBOARD
+========================================= */
+
+function updateCurrentDate() {
+
+    const dateElement =
+        document.getElementById("currentDate");
+
+
+    if (!dateElement)
+        return;
+
+
+    const today = new Date();
+
+
+    const formattedDate =
+        today.toLocaleDateString(
+            "fr-FR",
+            {
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+
+    dateElement.textContent =
+        formattedDate.toUpperCase();
+
+}
