@@ -657,135 +657,273 @@ function updateBalanceStatus() {
 
 function calculateFinancialScore() {
 
+    const transactions = appData.transactions || [];
+    const savingsData = appData.savings || [];
+
     const income = getTotalIncome();
     const expenses = getTotalExpenses();
     const savings = getTotalSavings();
 
-    /*
-       Pas assez de données pour établir
-       un véritable score financier.
-    */
+    // Nombre d'opérations réellement enregistrées
+    const operationCount = transactions.length;
 
-    if (appData.transactions.length < 3) {
+    // Nombre d'encaissements
+    const incomeTransactions = transactions.filter(
+        transaction => transaction.type === "income"
+    );
 
+    // Le score ne démarre pas trop tôt
+    if (
+        operationCount < 5 ||
+        incomeTransactions.length < 2 ||
+        expenses <= 0 ||
+        savings <= 0
+    ) {
         return null;
-
     }
 
     const scores = [];
 
-    let savingsScore = null;
-    let expensesScore = null;
-    let businessScore = null;
-    let tradingScore = null;
-    let regularityScore = null;
+    /* =====================================
+       1. ÉPARGNE — 30%
+    ===================================== */
+
+    const savingRate =
+        income > 0
+            ? (savings / income) * 100
+            : 0;
+
+    // Objectif de référence : 20% d'épargne
+    const savingsScore = Math.min(
+        (savingRate / 20) * 100,
+        100
+    );
+
+    scores.push({
+        name: "savings",
+        score: savingsScore,
+        weight: 30
+    });
 
 
-    /* =========================
-       ÉPARGNE
-    ========================= */
+    /* =====================================
+       2. DÉPENSES — 25%
+    ===================================== */
 
-    if (income > 0) {
+    const expenseRate =
+        income > 0
+            ? (expenses / income) * 100
+            : 0;
 
-        const savingRate =
-            (savings / income) * 100;
+    /*
+       <= 50% des revenus dépensés :
+       excellente maîtrise.
 
-        savingsScore =
-            Math.min(savingRate * 2, 100);
+       100% ou plus :
+       score nul.
+    */
 
-        scores.push(savingsScore);
+    let expensesScore;
 
-    }
+    if (expenseRate <= 50) {
 
+        expensesScore = 100;
 
-    /* =========================
-       DÉPENSES
-    ========================= */
-
-    if (income > 0) {
-
-        const expenseRate =
-            (expenses / income) * 100;
+    } else {
 
         expensesScore =
             Math.max(
-                100 - expenseRate,
-                0
+                0,
+                100 -
+                ((expenseRate - 50) / 50) * 100
             );
 
-        scores.push(expensesScore);
-
     }
 
+    scores.push({
+        name: "expenses",
+        score: expensesScore,
+        weight: 25
+    });
 
-    /* =========================
-       BUSINESS
-    ========================= */
 
-    /*
-       On ne donne pas automatiquement
-       100/100 au business.
+    /* =====================================
+       3. BUSINESS — 20%
+    ===================================== */
 
-       Il faudra suffisamment d'historique
-       pour mesurer son évolution.
-    */
-
-    const incomeTransactions =
-        appData.transactions.filter(
-            transaction =>
-                transaction.type === "income"
-        );
-
+    let businessScore = null;
 
     if (incomeTransactions.length >= 5) {
 
-        businessScore =
-            calculateBusinessScore();
+        const ordered =
+            [...incomeTransactions].sort(
+                (a, b) =>
+                    new Date(a.date) -
+                    new Date(b.date)
+            );
 
-        if (businessScore !== null) {
+        const middle =
+            Math.floor(ordered.length / 2);
 
-            scores.push(businessScore);
+        const firstPart =
+            ordered.slice(0, middle);
+
+        const secondPart =
+            ordered.slice(middle);
+
+
+        const firstAverage =
+            firstPart.reduce(
+                (total, transaction) =>
+                    total +
+                    Number(transaction.amount || 0),
+                0
+            ) /
+            Math.max(firstPart.length, 1);
+
+
+        const secondAverage =
+            secondPart.reduce(
+                (total, transaction) =>
+                    total +
+                    Number(transaction.amount || 0),
+                0
+            ) /
+            Math.max(secondPart.length, 1);
+
+
+        if (firstAverage > 0) {
+
+            const growth =
+                (
+                    (secondAverage - firstAverage)
+                    /
+                    firstAverage
+                ) * 100;
+
+
+            /*
+               +20% ou plus :
+               100
+
+               0% :
+               60
+
+               -20% ou moins :
+               20
+            */
+
+            businessScore =
+                Math.min(
+                    100,
+                    Math.max(
+                        20,
+                        60 + growth * 2
+                    )
+                );
 
         }
 
     }
 
 
-    /* =========================
-       TRADING
-    ========================= */
+    if (businessScore !== null) {
+
+        scores.push({
+            name: "business",
+            score: businessScore,
+            weight: 20
+        });
+
+    }
+
+
+    /* =====================================
+       4. TRADING — 15%
+    ===================================== */
 
     /*
-       Le trading sera connecté
-       lorsque nous construirons
-       le module Trading.
+       Le module Trading n'est pas encore
+       suffisamment développé.
+
+       Donc aucune note fictive.
     */
 
-    tradingScore = null;
+    const tradingScore = null;
 
 
-    /* =========================
-       RÉGULARITÉ
-    ========================= */
+    /* =====================================
+       5. RÉGULARITÉ — 10%
+    ===================================== */
+
+    let regularityScore = null;
 
     if (incomeTransactions.length >= 5) {
+
+        const dates =
+            incomeTransactions
+                .map(
+                    transaction =>
+                        new Date(transaction.date)
+                )
+                .sort(
+                    (a, b) => a - b
+                );
+
+
+        const firstDate =
+            dates[0];
+
+        const lastDate =
+            dates[dates.length - 1];
+
+
+        const days =
+            Math.max(
+                1,
+                (
+                    lastDate - firstDate
+                ) /
+                (1000 * 60 * 60 * 24)
+            );
+
+
+        /*
+           On mesure la fréquence moyenne
+           des encaissements.
+        */
+
+        const frequency =
+            incomeTransactions.length /
+            days;
+
 
         regularityScore =
-            calculateRegularityScore();
-
-        if (regularityScore !== null) {
-
-            scores.push(regularityScore);
-
-        }
+            Math.min(
+                100,
+                Math.max(
+                    0,
+                    frequency * 30
+                )
+            );
 
     }
 
 
-    /*
-       Il faut au minimum
-       plusieurs critères valides.
-    */
+    if (regularityScore !== null) {
+
+        scores.push({
+            name: "regularity",
+            score: regularityScore,
+            weight: 10
+        });
+
+    }
+
+
+    /* =====================================
+       SCORE GLOBAL
+    ===================================== */
 
     if (scores.length < 2) {
 
@@ -794,11 +932,37 @@ function calculateFinancialScore() {
     }
 
 
-    const globalScore =
+    /*
+       On ne donne pas automatiquement
+       les points des critères inexistants.
+
+       Le score est calculé uniquement
+       avec les critères réellement disponibles.
+    */
+
+    const totalWeight =
         scores.reduce(
-            (sum, score) => sum + score,
+            (total, item) =>
+                total + item.weight,
             0
-        ) / scores.length;
+        );
+
+
+    const weightedScore =
+        scores.reduce(
+            (total, item) =>
+                total +
+                (
+                    item.score *
+                    item.weight
+                ),
+            0
+        );
+
+
+    const globalScore =
+        weightedScore /
+        totalWeight;
 
 
     return {
@@ -807,14 +971,10 @@ function calculateFinancialScore() {
             Math.round(globalScore),
 
         savings:
-            savingsScore === null
-                ? null
-                : Math.round(savingsScore),
+            Math.round(savingsScore),
 
         expenses:
-            expensesScore === null
-                ? null
-                : Math.round(expensesScore),
+            Math.round(expensesScore),
 
         business:
             businessScore === null
@@ -822,9 +982,7 @@ function calculateFinancialScore() {
                 : Math.round(businessScore),
 
         trading:
-            tradingScore === null
-                ? null
-                : Math.round(tradingScore),
+            tradingScore,
 
         regularity:
             regularityScore === null
@@ -832,101 +990,6 @@ function calculateFinancialScore() {
                 : Math.round(regularityScore)
 
     };
-
-}
-
-function calculateBusinessScore() {
-
-    const incomes =
-        appData.transactions
-            .filter(
-                transaction =>
-                    transaction.type === "income"
-            )
-            .sort(
-                (a, b) =>
-                    new Date(a.date) -
-                    new Date(b.date)
-            );
-
-
-    if (incomes.length < 5) {
-
-        return null;
-
-    }
-
-
-    /*
-       Pour l'instant on mesure simplement
-       la régularité des encaissements.
-
-       Nous améliorerons cette formule
-       plus tard avec les statistiques
-       du business.
-    */
-
-    const activeDays =
-        new Set(
-            incomes.map(
-                transaction => transaction.date
-            )
-        ).size;
-
-
-    const score =
-        Math.min(
-            (activeDays / 10) * 100,
-            100
-        );
-
-
-    return score;
-
-}
-
-
-function calculateRegularityScore() {
-
-    const incomes =
-        appData.transactions.filter(
-            transaction =>
-                transaction.type === "income"
-        );
-
-
-    if (incomes.length < 5) {
-
-        return null;
-
-    }
-
-
-    const dates =
-        incomes.map(
-            transaction =>
-                new Date(transaction.date)
-        );
-
-
-    const uniqueDays =
-        new Set(
-            dates.map(
-                date =>
-                    date.toISOString().split("T")[0]
-            )
-        );
-
-
-    /*
-       Plus les encaissements sont répartis
-       régulièrement, meilleur est le score.
-    */
-
-    return Math.min(
-        uniqueDays.size * 10,
-        100
-    );
 
 }
 
@@ -941,77 +1004,139 @@ function updateFinancialScore() {
 
 
     const score =
-        document.getElementById("financialScore");
+        document.getElementById(
+            "financialScore"
+        );
 
     const status =
-        document.getElementById("scoreStatus");
+        document.getElementById(
+            "scoreStatus"
+        );
 
 
-   if (!result) {
+    /*
+       Pas assez de données
+    */
 
-    if (score)
-        score.textContent = "—";
+    if (!result) {
 
-    if (status)
-        status.textContent =
-            "Pas encore assez de données";
+        if (score) {
 
-    setScore("scoreSavings", null);
-    setScore("scoreExpenses", null);
-    setScore("scoreBusiness", null);
-    setScore("scoreTrading", null);
-    setScore("scoreRegularity", null);
+            score.textContent = "—";
 
-    return;
+        }
 
-}
+        if (status) {
 
-
-    if (score)
-        score.textContent =
-            result.global;
-
-
-    if (status) {
-
-        if (result.global >= 80)
             status.textContent =
-                "Excellente gestion";
+                "Pas encore assez de données";
 
-        else if (result.global >= 60)
-            status.textContent =
-                "Gestion correcte";
+        }
 
-        else
-            status.textContent =
-                "Gestion à améliorer";
+
+        setScore(
+            "scoreSavings",
+            null
+        );
+
+        setScore(
+            "scoreExpenses",
+            null
+        );
+
+        setScore(
+            "scoreBusiness",
+            null
+        );
+
+        setScore(
+            "scoreTrading",
+            null
+        );
+
+        setScore(
+            "scoreRegularity",
+            null
+        );
+
+
+        return;
 
     }
 
+
+    /*
+       Score global
+    */
+
+    if (score) {
+
+        score.textContent =
+            result.global;
+
+    }
+
+
+    /*
+       Message
+    */
+
+    if (status) {
+
+        if (result.global >= 80) {
+
+            status.textContent =
+                "Excellente gestion";
+
+        }
+
+        else if (result.global >= 60) {
+
+            status.textContent =
+                "Gestion correcte";
+
+        }
+
+        else if (result.global >= 40) {
+
+            status.textContent =
+                "Gestion à améliorer";
+
+        }
+
+        else {
+
+            status.textContent =
+                "Situation préoccupante";
+
+        }
+
+    }
+
+
+    /*
+       Sous-scores
+    */
 
     setScore(
         "scoreSavings",
         result.savings
     );
 
-
     setScore(
         "scoreExpenses",
         result.expenses
     );
-
 
     setScore(
         "scoreBusiness",
         result.business
     );
 
-
     setScore(
         "scoreTrading",
         result.trading
     );
-
 
     setScore(
         "scoreRegularity",
@@ -1019,25 +1144,6 @@ function updateFinancialScore() {
     );
 
 }
-
-
-function setScore(id, value) {
-
-    const element =
-        document.getElementById(id);
-
-
-    if (!element)
-        return;
-
-
-    element.textContent =
-        value === null
-            ? "—"
-            : value;
-
-}
-
 
 /* =========================================
    ALERTES INTELLIGENTES
