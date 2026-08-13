@@ -657,103 +657,148 @@ function updateBalanceStatus() {
 
 function calculateFinancialScore() {
 
-    const income =
-        getTotalIncome();
+    const income = getTotalIncome();
+    const expenses = getTotalExpenses();
+    const savings = getTotalSavings();
 
-    const expenses =
-        getTotalExpenses();
+    /*
+       Pas assez de données pour établir
+       un véritable score financier.
+    */
 
-    const savings =
-        getTotalSavings();
+    if (appData.transactions.length < 3) {
+
+        return null;
+
+    }
+
+    const scores = [];
+
+    let savingsScore = null;
+    let expensesScore = null;
+    let businessScore = null;
+    let tradingScore = null;
+    let regularityScore = null;
+
+
+    /* =========================
+       ÉPARGNE
+    ========================= */
+
+    if (income > 0) {
+
+        const savingRate =
+            (savings / income) * 100;
+
+        savingsScore =
+            Math.min(savingRate * 2, 100);
+
+        scores.push(savingsScore);
+
+    }
+
+
+    /* =========================
+       DÉPENSES
+    ========================= */
+
+    if (income > 0) {
+
+        const expenseRate =
+            (expenses / income) * 100;
+
+        expensesScore =
+            Math.max(
+                100 - expenseRate,
+                0
+            );
+
+        scores.push(expensesScore);
+
+    }
+
+
+    /* =========================
+       BUSINESS
+    ========================= */
+
+    /*
+       On ne donne pas automatiquement
+       100/100 au business.
+
+       Il faudra suffisamment d'historique
+       pour mesurer son évolution.
+    */
+
+    const incomeTransactions =
+        appData.transactions.filter(
+            transaction =>
+                transaction.type === "income"
+        );
+
+
+    if (incomeTransactions.length >= 5) {
+
+        businessScore =
+            calculateBusinessScore();
+
+        if (businessScore !== null) {
+
+            scores.push(businessScore);
+
+        }
+
+    }
+
+
+    /* =========================
+       TRADING
+    ========================= */
+
+    /*
+       Le trading sera connecté
+       lorsque nous construirons
+       le module Trading.
+    */
+
+    tradingScore = null;
+
+
+    /* =========================
+       RÉGULARITÉ
+    ========================= */
+
+    if (incomeTransactions.length >= 5) {
+
+        regularityScore =
+            calculateRegularityScore();
+
+        if (regularityScore !== null) {
+
+            scores.push(regularityScore);
+
+        }
+
+    }
 
 
     /*
-       Tant qu'on n'a pas suffisamment
-       de données, on ne fabrique pas
-       un score.
+       Il faut au minimum
+       plusieurs critères valides.
     */
 
-    if (income <= 0) {
+    if (scores.length < 2) {
 
         return null;
 
     }
 
 
-    /*
-       TAUX D'ÉPARGNE
-    */
-
-    const savingRate =
-        (savings / income) * 100;
-
-
-    let savingsScore =
-        Math.min(savingRate * 2, 100);
-
-
-    /*
-       TAUX DE DÉPENSES
-    */
-
-    const expenseRate =
-        (expenses / income) * 100;
-
-
-    let expenseScore =
-        Math.max(
-            100 - expenseRate,
-            0
-        );
-
-
-    /*
-       BUSINESS
-    */
-
-    const businessScore =
-        income > 0 ? 100 : 0;
-
-
-    /*
-       TRADING
-
-       Pour le moment :
-       pas suffisamment de données.
-    */
-
-    const tradingScore = null;
-
-
-    /*
-       SCORE GLOBAL
-
-       Pour l'instant on utilise
-       seulement les données disponibles.
-    */
-
-    const scores = [
-        savingsScore,
-        expenseScore,
-        businessScore
-    ];
-
-
-    const validScores =
-        scores.filter(
-            score => score !== null
-        );
-
-
-    if (validScores.length === 0)
-        return null;
-
-
     const globalScore =
-        validScores.reduce(
+        scores.reduce(
             (sum, score) => sum + score,
             0
-        ) / validScores.length;
+        ) / scores.length;
 
 
     return {
@@ -762,24 +807,128 @@ function calculateFinancialScore() {
             Math.round(globalScore),
 
         savings:
-            Math.round(savingsScore),
+            savingsScore === null
+                ? null
+                : Math.round(savingsScore),
 
         expenses:
-            Math.round(expenseScore),
+            expensesScore === null
+                ? null
+                : Math.round(expensesScore),
 
         business:
-            Math.round(businessScore),
+            businessScore === null
+                ? null
+                : Math.round(businessScore),
 
         trading:
-            tradingScore,
+            tradingScore === null
+                ? null
+                : Math.round(tradingScore),
 
         regularity:
-            null
+            regularityScore === null
+                ? null
+                : Math.round(regularityScore)
 
     };
 
 }
 
+function calculateBusinessScore() {
+
+    const incomes =
+        appData.transactions
+            .filter(
+                transaction =>
+                    transaction.type === "income"
+            )
+            .sort(
+                (a, b) =>
+                    new Date(a.date) -
+                    new Date(b.date)
+            );
+
+
+    if (incomes.length < 5) {
+
+        return null;
+
+    }
+
+
+    /*
+       Pour l'instant on mesure simplement
+       la régularité des encaissements.
+
+       Nous améliorerons cette formule
+       plus tard avec les statistiques
+       du business.
+    */
+
+    const activeDays =
+        new Set(
+            incomes.map(
+                transaction => transaction.date
+            )
+        ).size;
+
+
+    const score =
+        Math.min(
+            (activeDays / 10) * 100,
+            100
+        );
+
+
+    return score;
+
+}
+
+
+function calculateRegularityScore() {
+
+    const incomes =
+        appData.transactions.filter(
+            transaction =>
+                transaction.type === "income"
+        );
+
+
+    if (incomes.length < 5) {
+
+        return null;
+
+    }
+
+
+    const dates =
+        incomes.map(
+            transaction =>
+                new Date(transaction.date)
+        );
+
+
+    const uniqueDays =
+        new Set(
+            dates.map(
+                date =>
+                    date.toISOString().split("T")[0]
+            )
+        );
+
+
+    /*
+       Plus les encaissements sont répartis
+       régulièrement, meilleur est le score.
+    */
+
+    return Math.min(
+        uniqueDays.size * 10,
+        100
+    );
+
+}
 
 /* =========================================
    AFFICHAGE DU SCORE
@@ -798,18 +947,24 @@ function updateFinancialScore() {
         document.getElementById("scoreStatus");
 
 
-    if (!result) {
+   if (!result) {
 
-        if (score)
-            score.textContent = "—";
+    if (score)
+        score.textContent = "—";
 
-        if (status)
-            status.textContent =
-                "Pas encore assez de données";
+    if (status)
+        status.textContent =
+            "Pas encore assez de données";
 
-        return;
+    setScore("scoreSavings", null);
+    setScore("scoreExpenses", null);
+    setScore("scoreBusiness", null);
+    setScore("scoreTrading", null);
+    setScore("scoreRegularity", null);
 
-    }
+    return;
+
+}
 
 
     if (score)
