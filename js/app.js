@@ -2207,6 +2207,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initializeHistory();
 
+    initializeMainNavigation();
+
 });
 
 /* =========================================
@@ -2901,5 +2903,118 @@ function initializeHistory() {
 
 
     renderHistory("all");
+
+}
+
+/* =========================================
+   NAVIGATION DASHBOARD / HISTORIQUE
+========================================= */
+
+function initializeMainNavigation() {
+
+    const dashboard =
+        document.querySelector(".dashboard");
+
+    const history =
+        document.getElementById("historyView");
+
+    const dashboardButton =
+        document.getElementById("openDashboard");
+
+    const historyButton =
+        document.getElementById("openHistory");
+
+
+    if (
+        !dashboard ||
+        !history ||
+        !dashboardButton ||
+        !historyButton
+    ) {
+
+        console.error(
+            "Navigation Dashboard / Historique introuvable."
+        );
+
+        return;
+
+    }
+
+
+    /* =========================
+       AFFICHER DASHBOARD
+    ========================= */
+
+    dashboardButton.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            dashboard.style.display = "";
+
+            history.style.display = "none";
+
+
+            dashboardButton.classList.add(
+                "active"
+            );
+
+            historyButton.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    /* =========================
+       AFFICHER HISTORIQUE
+    ========================= */
+
+    historyButton.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+            dashboard.style.display = "none";
+
+            history.style.display = "block";
+
+
+            historyButton.classList.add(
+                "active"
+            );
+
+            dashboardButton.classList.remove(
+                "active"
+            );
+
+
+            /*
+               Actualiser les données
+            */
+
+            if (
+                typeof renderHistory ===
+                "function"
+            ) {
+
+                renderHistory("all");
+
+            }
+
+        }
+    );
+
+
+    /*
+       État initial :
+       Dashboard visible,
+       Historique caché.
+    */
+
+    history.style.display = "none";
 
 }
