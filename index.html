@@ -655,6 +655,117 @@
 
     </main>
 
+<!-- =========================
+     VUE HISTORIQUE
+========================== -->
+
+<section class="dashboard-section history-view" id="historyView">
+
+    <div class="section-header">
+
+        <div>
+            <span class="eyebrow">
+                TRANSACTIONS
+            </span>
+
+            <h2>
+                Historique
+            </h2>
+
+            <p>
+                Toutes tes opérations enregistrées.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- FILTRES -->
+
+    <div class="history-filters">
+
+        <button
+            type="button"
+            class="history-filter active"
+            data-history-filter="all"
+        >
+            Toutes
+        </button>
+
+        <button
+            type="button"
+            class="history-filter"
+            data-history-filter="income"
+        >
+            Revenus
+        </button>
+
+        <button
+            type="button"
+            class="history-filter"
+            data-history-filter="expense"
+        >
+            Dépenses
+        </button>
+
+    </div>
+
+
+    <!-- LISTE DES TRANSACTIONS -->
+
+    <div
+        class="history-list"
+        id="historyList"
+    >
+    </div>
+
+
+    <!-- RÉSUMÉ -->
+
+    <div class="history-summary">
+
+        <div class="history-summary-card">
+
+            <span>
+                Revenus
+            </span>
+
+            <strong id="historyIncomeTotal">
+                0 F
+            </strong>
+
+        </div>
+
+
+        <div class="history-summary-card">
+
+            <span>
+                Dépenses
+            </span>
+
+            <strong id="historyExpenseTotal">
+                0 F
+            </strong>
+
+        </div>
+
+
+        <div class="history-summary-card">
+
+            <span>
+                Solde
+            </span>
+
+            <strong id="historyBalance">
+                0 F
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+    
     <!-- =========================
      MODAL AJOUTER UNE ENTRÉE
 ========================== -->
