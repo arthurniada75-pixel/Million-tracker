@@ -1243,3 +1243,746 @@ function refreshFinancialDashboard() {
     updateAlerts();
 
 }
+
+/* =========================================
+   GRAPHIQUE — ÉVOLUTION FINANCIÈRE
+========================================= */
+
+let currentChartPeriod = "7";
+
+
+/* =========================================
+   RÉCUPÉRER LES DONNÉES
+========================================= */
+
+function getChartTransactions() {
+
+    return appData.transactions || [];
+
+}
+
+
+function getChartSavings() {
+
+    return appData.savings || [];
+
+}
+
+
+/* =========================================
+   DATE DE DÉBUT
+========================================= */
+
+function getPeriodStart(period) {
+
+    const now = new Date();
+
+    const start = new Date(now);
+
+
+    switch (period) {
+
+        case "7":
+
+            start.setDate(
+                start.getDate() - 6
+            );
+
+            break;
+
+
+        case "30":
+
+            start.setDate(
+                start.getDate() - 29
+            );
+
+            break;
+
+
+        case "3m":
+
+            start.setMonth(
+                start.getMonth() - 3
+            );
+
+            break;
+
+
+        case "6m":
+
+            start.setMonth(
+                start.getMonth() - 6
+            );
+
+            break;
+
+
+        case "1y":
+
+            start.setFullYear(
+                start.getFullYear() - 1
+            );
+
+            break;
+
+    }
+
+
+    start.setHours(0, 0, 0, 0);
+
+    return start;
+
+}
+
+
+/* =========================================
+   FORMAT DE DATE
+========================================= */
+
+function dateKey(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================
+   CRÉER LES PÉRIODES
+========================================= */
+
+function createChartPeriods(period) {
+
+    const now = new Date();
+
+    const start =
+        getPeriodStart(period);
+
+
+    const periods = [];
+
+
+    /*
+       7 JOURS
+    */
+
+    if (period === "7") {
+
+        let current =
+            new Date(start);
+
+
+        while (current <= now) {
+
+            periods.push({
+
+                key: dateKey(current),
+
+                date: new Date(current)
+
+            });
+
+
+            current.setDate(
+                current.getDate() + 1
+            );
+
+        }
+
+    }
+
+
+    /*
+       30 JOURS
+    */
+
+    else if (period === "30") {
+
+        let current =
+            new Date(start);
+
+
+        while (current <= now) {
+
+            periods.push({
+
+                key: dateKey(current),
+
+                date: new Date(current)
+
+            });
+
+
+            current.setDate(
+                current.getDate() + 1
+            );
+
+        }
+
+    }
+
+
+    /*
+       3 / 6 / 12 MOIS
+    */
+
+    else {
+
+        let current =
+            new Date(
+                start.getFullYear(),
+                start.getMonth(),
+                1
+            );
+
+
+        while (current <= now) {
+
+            periods.push({
+
+                key:
+                    `${current.getFullYear()}-${String(
+                        current.getMonth() + 1
+                    ).padStart(2, "0")}`,
+
+                date:
+                    new Date(current)
+
+            });
+
+
+            current.setMonth(
+                current.getMonth() + 1
+            );
+
+        }
+
+    }
+
+
+    return periods;
+
+}
+
+
+/* =========================================
+   AGRÉGER LES DONNÉES
+========================================= */
+
+function buildChartData(period) {
+
+    const periods =
+        createChartPeriods(period);
+
+
+    const transactions =
+        getChartTransactions();
+
+
+    const savings =
+        getChartSavings();
+
+
+    let cumulativeIncome = 0;
+
+    let cumulativeExpenses = 0;
+
+    let cumulativeSavings = 0;
+
+
+    const data = periods.map(item => {
+
+        let income = 0;
+
+        let expense = 0;
+
+        let saving = 0;
+
+
+        transactions.forEach(transaction => {
+
+            const transactionDate =
+                new Date(transaction.date);
+
+
+            let matches = false;
+
+
+            if (
+                period === "7" ||
+                period === "30"
+            ) {
+
+                matches =
+                    dateKey(transactionDate)
+                    === item.key;
+
+            }
+
+            else {
+
+                matches =
+                    `${transactionDate.getFullYear()}-${String(
+                        transactionDate.getMonth() + 1
+                    ).padStart(2, "0")}`
+                    === item.key;
+
+            }
+
+
+            if (!matches)
+                return;
+
+
+            if (
+                transaction.type === "income"
+            ) {
+
+                income +=
+                    Number(transaction.amount) || 0;
+
+            }
+
+
+            if (
+                transaction.type === "expense"
+            ) {
+
+                expense +=
+                    Number(transaction.amount) || 0;
+
+            }
+
+        });
+
+
+        savings.forEach(itemSaving => {
+
+            const savingDate =
+                new Date(itemSaving.date);
+
+
+            let matches = false;
+
+
+            if (
+                period === "7" ||
+                period === "30"
+            ) {
+
+                matches =
+                    dateKey(savingDate)
+                    === item.key;
+
+            }
+
+            else {
+
+                matches =
+                    `${savingDate.getFullYear()}-${String(
+                        savingDate.getMonth() + 1
+                    ).padStart(2, "0")}`
+                    === item.key;
+
+            }
+
+
+            if (matches) {
+
+                saving +=
+                    Number(itemSaving.amount) || 0;
+
+            }
+
+        });
+
+
+        cumulativeIncome += income;
+
+        cumulativeExpenses += expense;
+
+        cumulativeSavings += saving;
+
+
+        return {
+
+            label: formatChartLabel(item.date, period),
+
+            income: cumulativeIncome,
+
+            expense: cumulativeExpenses,
+
+            saving: cumulativeSavings
+
+        };
+
+    });
+
+
+    return data;
+
+}
+
+
+/* =========================================
+   LABELS
+========================================= */
+
+function formatChartLabel(date, period) {
+
+    if (
+        period === "3m" ||
+        period === "6m" ||
+        period === "1y"
+    ) {
+
+        return date.toLocaleDateString(
+            "fr-FR",
+            {
+                month: "short"
+            }
+        );
+
+    }
+
+
+    return date.toLocaleDateString(
+        "fr-FR",
+        {
+            day: "numeric",
+            month: "short"
+        }
+    );
+
+}
+
+
+/* =========================================
+   DESSINER LE GRAPHIQUE
+========================================= */
+
+function renderFinancialChart() {
+
+    const svg =
+        document.getElementById(
+            "financialChartSvg"
+        );
+
+
+    if (!svg)
+        return;
+
+
+    const data =
+        buildChartData(
+            currentChartPeriod
+        );
+
+
+    const incomeLine =
+        document.getElementById(
+            "incomeLine"
+        );
+
+    const expenseLine =
+        document.getElementById(
+            "expenseLine"
+        );
+
+    const savingLine =
+        document.getElementById(
+            "savingLine"
+        );
+
+    const labels =
+        document.getElementById(
+            "chartLabels"
+        );
+
+    const empty =
+        document.getElementById(
+            "chartEmpty"
+        );
+
+
+    /*
+       Aucune opération
+    */
+
+    if (
+        data.length === 0 ||
+        getChartTransactions().length === 0
+    ) {
+
+        svg.style.display = "none";
+
+        empty.classList.remove("hidden");
+
+        labels.innerHTML = "";
+
+        return;
+
+    }
+
+
+    svg.style.display = "block";
+
+    empty.classList.add("hidden");
+
+
+    /*
+       Dimensions SVG
+    */
+
+    const width = 800;
+
+    const height = 300;
+
+    const paddingTop = 20;
+
+    const paddingBottom = 35;
+
+
+    /*
+       Trouver le maximum
+    */
+
+    const maxValue =
+        Math.max(
+
+            ...data.map(item =>
+                Math.max(
+                    item.income,
+                    item.expense,
+                    item.saving
+                )
+            ),
+
+            1
+
+        );
+
+
+    /*
+       Convertir valeur → coordonnées
+    */
+
+    function getPoint(value, index) {
+
+        const x =
+            data.length === 1
+                ? width / 2
+                : (index / (data.length - 1))
+                  * width;
+
+
+        const usableHeight =
+            height -
+            paddingTop -
+            paddingBottom;
+
+
+        const y =
+            paddingTop +
+            usableHeight -
+            (
+                value / maxValue
+            ) *
+            usableHeight;
+
+
+        return `${x},${y}`;
+
+    }
+
+
+    const incomePoints =
+        data.map(
+            (item, index) =>
+                getPoint(
+                    item.income,
+                    index
+                )
+        ).join(" ");
+
+
+    const expensePoints =
+        data.map(
+            (item, index) =>
+                getPoint(
+                    item.expense,
+                    index
+                )
+        ).join(" ");
+
+
+    const savingPoints =
+        data.map(
+            (item, index) =>
+                getPoint(
+                    item.saving,
+                    index
+                )
+        ).join(" ");
+
+
+    incomeLine.setAttribute(
+        "points",
+        incomePoints
+    );
+
+
+    expenseLine.setAttribute(
+        "points",
+        expensePoints
+    );
+
+
+    savingLine.setAttribute(
+        "points",
+        savingPoints
+    );
+
+
+    /*
+       Labels
+    */
+
+    labels.innerHTML =
+        data.map(item => {
+
+            return `
+                <span>
+                    ${item.label}
+                </span>
+            `;
+
+        }).join("");
+
+
+    /*
+       Limiter le nombre de labels
+       pour les longues périodes.
+    */
+
+    if (data.length > 8) {
+
+        const labelElements =
+            labels.querySelectorAll(
+                "span"
+            );
+
+
+        labelElements.forEach(
+            (element, index) => {
+
+                if (
+                    index !== 0 &&
+                    index !== data.length - 1 &&
+                    index % Math.ceil(
+                        data.length / 6
+                    ) !== 0
+                ) {
+
+                    element.style.visibility =
+                        "hidden";
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   BOUTONS 7J / 30J / 3M / 6M / 1AN
+========================================= */
+
+function initializeChartPeriods() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".period-button"
+        );
+
+
+    buttons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                /*
+                   Retirer active
+                */
+
+                buttons.forEach(
+                    item =>
+                        item.classList.remove(
+                            "active"
+                        )
+                );
+
+
+                /*
+                   Activer le bouton
+                */
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                /*
+                   Nouvelle période
+                */
+
+                currentChartPeriod =
+                    button.dataset.period;
+
+
+                /*
+                   Redessiner
+                */
+
+                renderFinancialChart();
+
+            }
+        );
+
+    });
+
+}
+
+
+/* =========================================
+   INITIALISATION GRAPHIQUE
+========================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        initializeChartPeriods();
+
+        renderFinancialChart();
+
+    }
+);
