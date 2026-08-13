@@ -1902,3 +1902,117 @@ body {
     }
 
 }
+
+/* =========================================
+   VRAI GRAPHIQUE FINANCIER
+========================================= */
+
+.chart-placeholder {
+    position: relative;
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+}
+
+.financial-chart-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 240px;
+    overflow: visible;
+}
+
+.chart-svg-line {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.chart-income {
+    stroke: #00e676;
+}
+
+.chart-expense {
+    stroke: #ff4d4d;
+}
+
+.chart-saving {
+    stroke: #8fffc4;
+}
+
+.chart-grid-line {
+    stroke: rgba(255,255,255,0.055);
+    stroke-width: 1;
+}
+
+.chart-point-income {
+    fill: #00e676;
+}
+
+.chart-point-expense {
+    fill: #ff4d4d;
+}
+
+.chart-point-saving {
+    fill: #8fffc4;
+}
+
+.chart-labels {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+
+    display: flex;
+    justify-content: space-between;
+
+    color: #68756e;
+    font-size: 9px;
+}
+
+.chart-empty {
+    position: absolute;
+
+    inset: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+
+    gap: 5px;
+
+    color: #69756f;
+
+    font-size: 11px;
+
+    z-index: 5;
+}
+
+.chart-empty small {
+    color: #4f5a55;
+    font-size: 9px;
+}
+
+.chart-empty.hidden {
+    display: none;
+}
+
+
+/* BOUTONS DE PÉRIODE */
+
+.period-button {
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.period-button.active {
+    color: #00e676;
+
+    border-color: #00e676;
+
+    background: rgba(0, 230, 118, 0.08);
+}
