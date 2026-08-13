@@ -388,20 +388,55 @@
                     </div>
 
 
-                    <div class="chart-placeholder">
+                   <div class="chart-placeholder" id="financialChart">
 
-                        <div class="chart-line"></div>
+    <div class="chart-empty" id="chartEmpty">
 
-                        <div class="chart-labels">
-                            <span>1</span>
-                            <span>2</span>
-                            <span>3</span>
-                            <span>4</span>
-                            <span>5</span>
-                            <span>6</span>
-                        </div>
+        <span>Aucune donnée suffisante</span>
 
-                    </div>
+        <small>
+            Enregistre plusieurs opérations pour voir ton évolution.
+        </small>
+
+    </div>
+
+    <svg
+        id="financialChartSvg"
+        class="financial-chart-svg"
+        viewBox="0 0 800 300"
+        preserveAspectRatio="none"
+    >
+
+        <g id="chartGrid"></g>
+
+        <polyline
+            id="incomeLine"
+            class="chart-svg-line chart-income"
+            points=""
+        />
+
+        <polyline
+            id="expenseLine"
+            class="chart-svg-line chart-expense"
+            points=""
+        />
+
+        <polyline
+            id="savingLine"
+            class="chart-svg-line chart-saving"
+            points=""
+        />
+
+        <g id="chartPoints"></g>
+
+    </svg>
+
+    <div
+        class="chart-labels"
+        id="chartLabels"
+    ></div>
+
+</div>
 
                     <div class="chart-legend">
 
