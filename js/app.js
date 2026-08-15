@@ -3482,3 +3482,397 @@ document.addEventListener(
     "DOMContentLoaded",
     initApp
 );
+
+/* =====================================================
+   HISTORIQUE DES TRANSACTIONS
+===================================================== */
+
+let currentHistoryFilter = "all";
+
+
+function renderHistory(filter = "all") {
+
+    const historyList =
+        document.getElementById("historyList");
+
+    if (!historyList) {
+        return;
+    }
+
+
+    let transactions =
+        Array.isArray(appData.transactions)
+            ? [...appData.transactions]
+            : [];
+
+
+    /* -----------------------------------------
+       FILTRE
+    ----------------------------------------- */
+
+    if (filter === "income") {
+
+        transactions =
+            transactions.filter(
+                transaction =>
+                    transaction.type === "income"
+            );
+
+    }
+
+
+    if (filter === "expense") {
+
+        transactions =
+            transactions.filter(
+                transaction =>
+                    transaction.type === "expense"
+            );
+
+    }
+
+
+    /* -----------------------------------------
+       ORDRE : PLUS RÉCENT EN PREMIER
+    ----------------------------------------- */
+
+    transactions.sort(
+        (a, b) => {
+
+            const dateA =
+                new Date(
+                    `${a.date}T00:00:00`
+                ).getTime();
+
+            const dateB =
+                new Date(
+                    `${b.date}T00:00:00`
+                ).getTime();
+
+            return dateB - dateA;
+
+        }
+    );
+
+
+    /* -----------------------------------------
+       RÉSUMÉ
+    ----------------------------------------- */
+
+    const totalIncome =
+        getTotalIncome();
+
+
+    const totalExpenses =
+        getTotalExpenses();
+
+
+    const balance =
+        totalIncome -
+        totalExpenses;
+
+
+    const incomeTotal =
+        document.getElementById(
+            "historyIncomeTotal"
+        );
+
+
+    const expenseTotal =
+        document.getElementById(
+            "historyExpenseTotal"
+        );
+
+
+    const balanceTotal =
+        document.getElementById(
+            "historyBalance"
+        );
+
+
+    if (incomeTotal) {
+
+        incomeTotal.textContent =
+            formatMoney(totalIncome);
+
+    }
+
+
+    if (expenseTotal) {
+
+        expenseTotal.textContent =
+            formatMoney(totalExpenses);
+
+    }
+
+
+    if (balanceTotal) {
+
+        balanceTotal.textContent =
+            formatMoney(balance);
+
+    }
+
+
+    /* -----------------------------------------
+       AUCUNE TRANSACTION
+    ----------------------------------------- */
+
+    if (!transactions.length) {
+
+        historyList.innerHTML = `
+
+            <div class="history-empty">
+
+                <strong>
+                    Aucune transaction
+                </strong>
+
+                <span>
+                    Tes opérations enregistrées apparaîtront ici.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------
+       AFFICHAGE
+    ----------------------------------------- */
+
+    historyList.innerHTML =
+        transactions.map(
+            transaction => {
+
+                const isIncome =
+                    transaction.type ===
+                    "income";
+
+
+                const amount =
+                    Number(
+                        transaction.amount
+                    ) || 0;
+
+
+                const title =
+                    isIncome
+
+                        ? (
+                            transaction.source ||
+                            "Revenu"
+                        )
+
+                        : (
+                            transaction.category ||
+                            "Dépense"
+                        );
+
+
+                const category =
+                    transaction.category ||
+                    "";
+
+
+                const note =
+                    transaction.note ||
+                    "";
+
+
+                return `
+
+                    <div class="history-item">
+
+                        <div class="history-item-info">
+
+                            <strong>
+                                ${escapeHTML(title)}
+                            </strong>
+
+                            <span>
+                                ${escapeHTML(
+                                    formatDate(
+                                        transaction.date
+                                    )
+                                )}
+                            </span>
+
+                            ${
+                                category
+                                    ? `
+                                        <small>
+                                            ${escapeHTML(
+                                                category
+                                            )}
+                                        </small>
+                                      `
+                                    : ""
+                            }
+
+                            ${
+                                note
+                                    ? `
+                                        <small>
+                                            ${escapeHTML(
+                                                note
+                                            )}
+                                        </small>
+                                      `
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <strong
+                            class="history-amount"
+                        >
+
+                            ${
+                                isIncome
+                                    ? "+"
+                                    : "-"
+                            }${formatMoney(amount)}
+
+                        </strong>
+
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+}
+
+
+/* =====================================================
+   OUVRIR L'HISTORIQUE
+===================================================== */
+
+function initializeHistory() {
+
+    const openHistory =
+        document.getElementById(
+            "openHistory"
+        );
+
+
+    const historyView =
+        document.getElementById(
+            "historyView"
+        );
+
+
+    if (!openHistory || !historyView) {
+
+        console.warn(
+            "Historique : élément introuvable."
+        );
+
+        return;
+
+    }
+
+
+    openHistory.addEventListener(
+        "click",
+        function(event) {
+
+            event.preventDefault();
+
+
+            /*
+               Cacher le Dashboard
+            */
+
+            const dashboard =
+                document.querySelector(
+                    ".dashboard"
+                );
+
+
+            if (dashboard) {
+
+                dashboard.style.display =
+                    "none";
+
+            }
+
+
+            /*
+               Afficher Historique
+            */
+
+            historyView.style.display =
+                "block";
+
+
+            /*
+               Charger les vraies données
+            */
+
+            currentHistoryFilter =
+                "all";
+
+
+            renderHistory(
+                currentHistoryFilter
+            );
+
+        }
+    );
+
+
+    /* -----------------------------------------
+       FILTRES
+    ----------------------------------------- */
+
+    const filters =
+        document.querySelectorAll(
+            ".history-filter"
+        );
+
+
+    filters.forEach(
+        filterButton => {
+
+            filterButton.addEventListener(
+                "click",
+                function() {
+
+                    filters.forEach(
+                        button =>
+                            button.classList.remove(
+                                "active"
+                            )
+                    );
+
+
+                    this.classList.add(
+                        "active"
+                    );
+
+
+                    currentHistoryFilter =
+                        this.dataset.historyFilter ||
+                        "all";
+
+
+                    renderHistory(
+                        currentHistoryFilter
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
