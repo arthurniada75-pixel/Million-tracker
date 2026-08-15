@@ -2906,39 +2906,6 @@ function initializeHistory() {
 
 }
 
-/* =========================================
-   NAVIGATION DASHBOARD / HISTORIQUE
-========================================= */
-
-function initializeMainNavigation() {
-
-    const dashboard =
-        document.querySelector(".dashboard");
-
-    const history =
-        document.getElementById("historyView");
-
-    const dashboardButton =
-        document.getElementById("openDashboard");
-
-    const historyButton =
-        document.getElementById("openHistory");
-
-
-    if (
-        !dashboard ||
-        !history ||
-        !dashboardButton ||
-        !historyButton
-    ) {
-
-        console.error(
-            "Navigation Dashboard / Historique introuvable."
-        );
-
-        return;
-
-    }
 
 
     /* =========================
