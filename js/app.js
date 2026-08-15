@@ -1,1177 +1,867 @@
-/* =========================================
+/* =========================================================
    MILLION TRACKER
-   SYSTÈME DE DONNÉES
-========================================= */
+   APPLICATION PRINCIPALE
+   Version propre - sans données fictives
+========================================================= */
 
-const STORAGE_KEY = "millionTrackerData";
 
-let appData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-    transactions: [],
-    savings: [],
-    trading: [],
-    settings: {
-        goal: 1000000
-    }
+/* =========================================================
+   1. CONFIGURATION
+========================================================= */
+
+const APP_CONFIG = {
+
+    storageKey: "millionTrackerData_v2",
+
+    goal: 1000000,
+
+    recommendedSavingRate: 0.30
+
 };
 
 
-/* =========================================
-   SAUVEGARDE
-========================================= */
+/* =========================================================
+   2. DONNÉES DE L'APPLICATION
+========================================================= */
 
-function saveData() {
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(appData)
-    );
-}
+let appData = loadData();
 
 
-/* =========================================
-   CALCULS
-========================================= */
+function createEmptyData() {
 
-function getTotalIncome() {
+    return {
 
-    return appData.transactions
-        .filter(transaction => transaction.type === "income")
-        .reduce((total, transaction) => {
-            return total + Number(transaction.amount);
-        }, 0);
-}
+        transactions: [],
 
+        savings: [],
 
-function getTotalExpenses() {
+        trading: [],
 
-    return appData.transactions
-        .filter(transaction => transaction.type === "expense")
-        .reduce((total, transaction) => {
-            return total + Number(transaction.amount);
-        }, 0);
-}
+        settings: {
 
+            goal: APP_CONFIG.goal
 
-function getTotalSavings() {
-
-    return appData.savings
-        .reduce((total, saving) => {
-            return total + Number(saving.amount);
-        }, 0);
-}
-
-
-function getBalance() {
-
-    return getTotalIncome() - getTotalExpenses() - getTotalSavings();
-}
-
-
-function getSavingsRecommendation(amount) {
-
-    return Number(amount) * 0.30;
-}
-
-
-/* =========================================
-   AJOUTER UNE ENTRÉE
-========================================= */
-
-function addIncome(data) {
-
-    const transaction = {
-
-        id: Date.now(),
-
-        type: "income",
-
-        amount: Number(data.amount),
-
-        source: data.source,
-
-        category: data.category,
-
-        date: data.date,
-
-        note: data.note || "",
-
-        createdAt: new Date().toISOString()
+        }
 
     };
 
-    appData.transactions.push(transaction);
-
-    saveData();
-
-    updateDashboard();
-
-    return transaction;
 }
 
 
-/* =========================================
-   INITIALISATION
-========================================= */
+/* =========================================================
+   3. LOCAL STORAGE
+========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+function loadData() {
 
-    console.log("Million Tracker chargé.");
+    try {
 
-    updateDashboard();
-
-    initializeExpenseModal();
-
-});
-
-
-/* =========================================
-   MODAL AJOUTER UNE DÉPENSE
-========================================= */
-
-function initializeExpenseModal() {
-
-    const modal =
-        document.getElementById("expenseModal");
-
-    const openButton =
-        document.getElementById("openExpenseModal");
-
-    const closeButton =
-        document.getElementById("closeExpenseModal");
-
-    const cancelButton =
-        document.getElementById("cancelExpense");
+        const saved =
+            localStorage.getItem(
+                APP_CONFIG.storageKey
+            );
 
 
-    /*
-       Vérification
-    */
+        if (!saved) {
 
-    if (!modal || !openButton) {
+            return createEmptyData();
+
+        }
+
+
+        const parsed =
+            JSON.parse(saved);
+
+
+        return {
+
+            transactions:
+                Array.isArray(parsed.transactions)
+                    ? parsed.transactions
+                    : [],
+
+            savings:
+                Array.isArray(parsed.savings)
+                    ? parsed.savings
+                    : [],
+
+            trading:
+                Array.isArray(parsed.trading)
+                    ? parsed.trading
+                    : [],
+
+            settings: {
+
+                goal:
+                    Number(
+                        parsed.settings?.goal
+                    ) ||
+                    APP_CONFIG.goal
+
+            }
+
+        };
+
+    } catch (error) {
 
         console.error(
-            "Modal dépense introuvable."
+            "Erreur lors du chargement des données :",
+            error
         );
 
-        return;
+        return createEmptyData();
 
     }
 
-
-    /*
-       OUVRIR LE MODAL
-    */
-
-    openButton.addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
-
-            modal.classList.add("show");
-
-        }
-    );
+}
 
 
-    /*
-       FERMER AVEC X
-    */
+function saveData() {
 
-    if (closeButton) {
+    try {
 
-        closeButton.addEventListener(
-            "click",
-            function() {
+        localStorage.setItem(
 
-                modal.classList.remove(
-                    "active"
-                );
+            APP_CONFIG.storageKey,
 
-            }
+            JSON.stringify(appData)
+
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Impossible de sauvegarder les données :",
+            error
         );
 
     }
 
-
-    /*
-       FERMER AVEC ANNULER
-    */
-
-    if (cancelButton) {
-
-        cancelButton.addEventListener(
-            "click",
-            function() {
-
-                modal.classList.remove(
-                    "active"
-                );
-
-            }
-        );
-
-    }
+}
 
 
-    /*
-       FERMER EN CLIQUANT À L'EXTÉRIEUR
-    */
+/* =========================================================
+   4. OUTILS GÉNÉRAUX
+========================================================= */
 
-    modal.addEventListener(
-        "click",
-        function(event) {
+function formatMoney(value) {
 
-            if (
-                event.target === modal
-            ) {
+    const amount =
+        Number(value) || 0;
 
-                modal.classList.remove(
-                    "active"
-                );
 
-            }
-
-        }
+    return (
+        amount.toLocaleString("fr-FR")
+        + " F"
     );
 
 }
 
-/* =========================================
-   DASHBOARD
-========================================= */
 
-function formatMoney(amount) {
+function formatDate(dateValue) {
 
-    return Number(amount).toLocaleString("fr-FR") + " F";
+    if (!dateValue) {
 
-}
-
-
-function updateDashboard() {
-
-    const income = getTotalIncome();
-
-    const expenses = getTotalExpenses();
-
-    const savings = getTotalSavings();
-
-    const balance = getBalance();
-
-
-    const incomeElement =
-        document.getElementById("totalIncome");
-
-    const expensesElement =
-        document.getElementById("totalExpenses");
-
-    const savingsElement =
-        document.getElementById("totalSavings");
-
-    const balanceElement =
-        document.getElementById("currentBalance");
-
-
-    if (incomeElement) {
-
-        incomeElement.textContent =
-            formatMoney(income);
+        return "Date inconnue";
 
     }
 
-
-    if (expensesElement) {
-
-        expensesElement.textContent =
-            formatMoney(expenses);
-
-    }
-
-
-    if (savingsElement) {
-
-        savingsElement.textContent =
-            formatMoney(savings);
-
-    }
-
-
-    if (balanceElement) {
-
-        balanceElement.textContent =
-            formatMoney(balance);
-
-       updateGoal();
-updateSavingRate();
-updateBalanceStatus();
-updateFinancialScore();
-updateAlerts();
-    }
-
-
-    console.log({
-
-        revenus: income,
-
-        dépenses: expenses,
-
-        épargne: savings,
-
-        solde: balance
-
-    });
-
-}
-
-/* =========================================
-   MODAL AJOUTER UNE ENTRÉE
-========================================= */
-
-const incomeModal = document.getElementById("incomeModal");
-
-const incomeForm = document.getElementById("incomeForm");
-
-const closeIncomeModal =
-    document.getElementById("closeIncomeModal");
-
-const cancelIncome =
-    document.getElementById("cancelIncome");
-
-const incomeAmount =
-    document.getElementById("incomeAmount");
-
-const incomeDate =
-    document.getElementById("incomeDate");
-
-const savingPreview =
-    document.getElementById("savingPreview");
-
-
-/* OUVRIR LA FENÊTRE */
-
-function openIncomeModal() {
-
-    incomeModal.classList.add("show");
-
-    incomeAmount.focus();
-
-}
-
-
-/* FERMER */
-
-function closeIncomeModalFunction() {
-
-    incomeModal.classList.remove("show");
-
-}
-
-
-/* BOUTONS SIDEBAR */
-
-document.querySelectorAll(".nav-item").forEach(item => {
-
-    const text = item.textContent.trim();
-
-    if (text.includes("Ajouter une entrée")) {
-
-        item.addEventListener("click", event => {
-
-            event.preventDefault();
-
-            openIncomeModal();
-
-        });
-
-    }
-
-});
-
-
-/* ACTION RAPIDE */
-
-document.querySelectorAll(".quick-action").forEach(button => {
-
-    const text = button.textContent;
-
-    if (text.includes("Ajouter une entrée")) {
-
-        button.addEventListener("click", () => {
-
-            openIncomeModal();
-
-        });
-
-    }
-
-});
-
-
-/* FERMETURE */
-
-closeIncomeModal.addEventListener(
-    "click",
-    closeIncomeModalFunction
-);
-
-
-cancelIncome.addEventListener(
-    "click",
-    closeIncomeModalFunction
-);
-
-
-/* CLIQUER EN DEHORS */
-
-incomeModal.addEventListener("click", event => {
-
-    if (event.target === incomeModal) {
-
-        closeIncomeModalFunction();
-
-    }
-
-});
-
-
-/* =========================================
-   DATE PAR DÉFAUT
-========================================= */
-
-const today = new Date();
-
-const formattedDate =
-    today.toISOString().split("T")[0];
-
-incomeDate.value = formattedDate;
-
-
-/* =========================================
-   CALCUL ÉPARGNE RECOMMANDÉE
-========================================= */
-
-incomeAmount.addEventListener("input", () => {
-
-    const amount =
-        Number(incomeAmount.value) || 0;
-
-    const recommendation =
-        getSavingsRecommendation(amount);
-
-    savingPreview.querySelector("strong").textContent =
-        recommendation.toLocaleString("fr-FR") + " F";
-
-});
-
-
-/* =========================================
-   ENREGISTREMENT
-========================================= */
-
-incomeForm.addEventListener("submit", event => {
-
-    event.preventDefault();
-
-
-    const amount =
-        Number(incomeAmount.value);
-
-    const source =
-        document.getElementById("incomeSource").value.trim();
-
-    const category =
-        document.getElementById("incomeCategory").value;
 
     const date =
-        incomeDate.value;
+        new Date(
+            dateValue + "T00:00:00"
+        );
 
-    const note =
-        document.getElementById("incomeNote").value.trim();
 
+    if (Number.isNaN(date.getTime())) {
 
-    if (!amount || amount <= 0) {
-
-        alert("Veuillez entrer un montant valide.");
-
-        return;
+        return dateValue;
 
     }
 
 
-    const transaction = addIncome({
+    return date.toLocaleDateString(
+        "fr-FR",
+        {
 
-        amount,
+            day: "2-digit",
 
-        source,
+            month: "long",
 
-        category,
+            year: "numeric"
 
-        date,
-
-        note
-
-    });
-
-
-    console.log(
-        "Nouvelle entrée enregistrée :",
-        transaction
+        }
     );
-
-
-    alert(
-        "Entrée de " +
-        amount.toLocaleString("fr-FR") +
-        " F enregistrée avec succès."
-    );
-
-
-    incomeForm.reset();
-
-    incomeDate.value = formattedDate;
-
-    savingPreview.querySelector("strong").textContent =
-        "0 F";
-
-    closeIncomeModalFunction();
-
-});
-
-/* =========================================
-   OBJECTIF FINANCIER
-========================================= */
-
-function updateGoal() {
-
-    const goal = appData.settings.goal;
-
-    const savings = getTotalSavings();
-
-    let percentage = 0;
-
-    if (goal > 0) {
-
-        percentage =
-            (savings / goal) * 100;
-
-    }
-
-    percentage =
-        Math.min(percentage, 100);
-
-
-    const remaining =
-        Math.max(goal - savings, 0);
-
-
-    const goalPercent =
-        document.getElementById("goalPercent");
-
-    const goalSaved =
-        document.getElementById("goalSaved");
-
-    const goalRemaining =
-        document.getElementById("goalRemaining");
-
-    const goalProgressBar =
-        document.getElementById("goalProgressBar");
-
-    const sidebarProgress =
-        document.getElementById("sidebarGoalProgress");
-
-    const sidebarPercent =
-        document.getElementById("sidebarGoalPercent");
-
-
-    if (goalPercent)
-        goalPercent.textContent =
-            percentage.toFixed(1) + " %";
-
-
-    if (goalSaved)
-        goalSaved.textContent =
-            formatMoney(savings);
-
-
-    if (goalRemaining)
-        goalRemaining.textContent =
-            formatMoney(remaining);
-
-
-    if (goalProgressBar)
-        goalProgressBar.style.width =
-            percentage + "%";
-
-
-    if (sidebarProgress)
-        sidebarProgress.style.width =
-            percentage + "%";
-
-
-    if (sidebarPercent)
-        sidebarPercent.textContent =
-            percentage.toFixed(1) + " %";
-
-
-    updateWeeklyAverage();
 
 }
 
 
-/* =========================================
-   MOYENNE D'ÉPARGNE HEBDOMADAIRE
-========================================= */
+function getTodayISO() {
 
-function updateWeeklyAverage() {
-
-    const weeklyAverageElement =
-        document.getElementById("weeklyAverage");
+    const now =
+        new Date();
 
 
-    if (!weeklyAverageElement)
-        return;
+    const year =
+        now.getFullYear();
 
 
-    if (appData.savings.length === 0) {
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
 
-        weeklyAverageElement.textContent = "—";
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(2, "0");
+
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
+
+}
+
+
+function setText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+function getIncomeTotal() {
+
+    return appData.transactions
+
+        .filter(
+            transaction =>
+                transaction.type === "income"
+        )
+
+        .reduce(
+
+            (total, transaction) =>
+
+                total +
+                (
+                    Number(
+                        transaction.amount
+                    ) || 0
+                ),
+
+            0
+
+        );
+
+}
+
+
+function getExpenseTotal() {
+
+    return appData.transactions
+
+        .filter(
+            transaction =>
+                transaction.type === "expense"
+        )
+
+        .reduce(
+
+            (total, transaction) =>
+
+                total +
+                (
+                    Number(
+                        transaction.amount
+                    ) || 0
+                ),
+
+            0
+
+        );
+
+}
+
+
+function getSavingsTotal() {
+
+    return appData.savings
+
+        .reduce(
+
+            (total, saving) =>
+
+                total +
+                (
+                    Number(
+                        saving.amount
+                    ) || 0
+                ),
+
+            0
+
+        );
+
+}
+
+
+function getTradingNet() {
+
+    return appData.trading
+
+        .reduce(
+
+            (total, trade) =>
+
+                total +
+                (
+                    Number(
+                        trade.result
+                    ) || 0
+                ),
+
+            0
+
+        );
+
+}
+
+
+function getCurrentBalance() {
+
+    return (
+
+        getIncomeTotal()
+
+        -
+
+        getExpenseTotal()
+
+        -
+
+        getSavingsTotal()
+
+    );
+
+}
+
+
+/* =========================================================
+   5. DATE ACTUELLE
+========================================================= */
+
+function updateCurrentDate() {
+
+    const element =
+        document.getElementById(
+            "currentDate"
+        );
+
+
+    if (!element) {
 
         return;
 
     }
-
-
-    const dates =
-        appData.savings.map(
-            saving => new Date(saving.date)
-        );
-
-
-    const oldestDate =
-        Math.min(...dates);
 
 
     const now =
         new Date();
 
 
-    const difference =
-        now - oldestDate;
+    element.textContent =
+        now.toLocaleDateString(
+            "fr-FR",
+            {
+
+                day: "2-digit",
+
+                month: "long",
+
+                year: "numeric"
+
+            }
+        );
+
+}
 
 
-    const weeks =
+/* =========================================================
+   6. DASHBOARD
+========================================================= */
+
+function updateDashboard() {
+
+    const income =
+        getIncomeTotal();
+
+
+    const expenses =
+        getExpenseTotal();
+
+
+    const savings =
+        getSavingsTotal();
+
+
+    const balance =
+        getCurrentBalance();
+
+
+    const goal =
+        Number(
+            appData.settings.goal
+        ) ||
+        APP_CONFIG.goal;
+
+
+    setText(
+        "totalIncome",
+        formatMoney(income)
+    );
+
+
+    setText(
+        "totalExpenses",
+        formatMoney(expenses)
+    );
+
+
+    setText(
+        "totalSavings",
+        formatMoney(savings)
+    );
+
+
+    setText(
+        "currentBalance",
+        formatMoney(balance)
+    );
+
+
+    /* -----------------------------------------
+       TAUX D'ÉPARGNE
+    ----------------------------------------- */
+
+    if (income > 0) {
+
+        const savingRate =
+            (
+                savings /
+                income
+            ) * 100;
+
+
+        setText(
+            "savingRate",
+            `${savingRate.toFixed(1)} %`
+        );
+
+    } else {
+
+        setText(
+            "savingRate",
+            "—"
+        );
+
+    }
+
+
+    /* -----------------------------------------
+       STATUT DU SOLDE
+    ----------------------------------------- */
+
+    if (balance > 0) {
+
+        setText(
+            "balanceStatus",
+            "Solde positif"
+        );
+
+    } else if (balance < 0) {
+
+        setText(
+            "balanceStatus",
+            "Solde négatif"
+        );
+
+    } else {
+
+        setText(
+            "balanceStatus",
+            "—"
+        );
+
+    }
+
+
+    /* -----------------------------------------
+       OBJECTIF
+    ----------------------------------------- */
+
+    updateGoalDisplay(
+        savings,
+        goal
+    );
+
+
+    /* -----------------------------------------
+       SCORE
+    ----------------------------------------- */
+
+    updateFinancialScore();
+
+
+    /* -----------------------------------------
+       ALERTES
+    ----------------------------------------- */
+
+    updateAlerts();
+
+
+    /* -----------------------------------------
+       SIDEBAR
+    ----------------------------------------- */
+
+    updateSidebarGoal(
+        savings,
+        goal
+    );
+
+
+    /* -----------------------------------------
+       GRAPHIQUE
+    ----------------------------------------- */
+
+    updateFinancialChart();
+
+
+    /* -----------------------------------------
+       HISTORIQUE
+    ----------------------------------------- */
+
+    renderHistory(
+        currentHistoryFilter
+    );
+
+}
+
+
+/* =========================================================
+   7. OBJECTIF 1 MILLION
+========================================================= */
+
+function updateGoalDisplay(
+    savings,
+    goal
+) {
+
+    const safeGoal =
         Math.max(
-            difference / (1000 * 60 * 60 * 24 * 7),
+            Number(goal) || APP_CONFIG.goal,
             1
         );
 
 
-    const average =
-        getTotalSavings() / weeks;
+    const percent =
+        Math.min(
+            (
+                savings /
+                safeGoal
+            ) * 100,
+            100
+        );
 
 
-    weeklyAverageElement.textContent =
-        formatMoney(Math.round(average));
+    const remaining =
+        Math.max(
+            safeGoal - savings,
+            0
+        );
+
+
+    setText(
+        "goalPercent",
+        `${percent.toFixed(1)} %`
+    );
+
+
+    setText(
+        "goalSaved",
+        formatMoney(savings)
+    );
+
+
+    setText(
+        "goalRemaining",
+        formatMoney(remaining)
+    );
+
+
+    const progress =
+        document.getElementById(
+            "goalProgressBar"
+        );
+
+
+    if (progress) {
+
+        progress.style.width =
+            `${percent}%`;
+
+    }
+
+
+    /* -----------------------------------------
+       MOYENNE HEBDOMADAIRE
+    ----------------------------------------- */
+
+    const weeklyAverage =
+        calculateWeeklyAverage();
+
+
+    setText(
+        "weeklyAverage",
+        weeklyAverage > 0
+            ? formatMoney(weeklyAverage)
+            : "—"
+    );
 
 }
 
 
-/* =========================================
-   TAUX D'ÉPARGNE
-========================================= */
-
-function updateSavingRate() {
-
-    const income =
-        getTotalIncome();
+function calculateWeeklyAverage() {
 
     const savings =
-        getTotalSavings();
+        appData.savings;
 
 
-    const element =
-        document.getElementById("savingRate");
+    if (!savings.length) {
 
-
-    if (!element)
-        return;
-
-
-    if (income <= 0) {
-
-        element.textContent = "—";
-
-        return;
+        return 0;
 
     }
 
 
-    const rate =
-        (savings / income) * 100;
-
-
-    element.textContent =
-        rate.toFixed(1) + " %";
-
-}
-
-
-/* =========================================
-   STATUT DU SOLDE
-========================================= */
-
-function updateBalanceStatus() {
-
-    const balance =
-        getBalance();
-
-
-    const element =
-        document.getElementById("balanceStatus");
-
-
-    if (!element)
-        return;
-
-
-    if (balance > 0) {
-
-        element.textContent =
-            "Disponible";
-
-        element.className =
-            "card-change positive";
-
-    }
-
-    else if (balance === 0) {
-
-        element.textContent =
-            "Équilibre";
-
-        element.className =
-            "card-change neutral";
-
-    }
-
-    else {
-
-        element.textContent =
-            "Déficit";
-
-        element.className =
-            "card-change negative";
-
-    }
-
-}
-
-
-/* =========================================
-   SCORE FINANCIER
-========================================= */
-
-function calculateFinancialScore() {
-
-    const transactions = appData.transactions || [];
-    const savingsData = appData.savings || [];
-
-    const income = getTotalIncome();
-    const expenses = getTotalExpenses();
-    const savings = getTotalSavings();
-
-    // Nombre d'opérations réellement enregistrées
-    const operationCount = transactions.length;
-
-    // Nombre d'encaissements
-    const incomeTransactions = transactions.filter(
-        transaction => transaction.type === "income"
-    );
-
-    // Le score ne démarre pas trop tôt
-    if (
-        operationCount < 5 ||
-        incomeTransactions.length < 2 ||
-        expenses <= 0 ||
-        savings <= 0
-    ) {
-        return null;
-    }
-
-    const scores = [];
-
-    /* =====================================
-       1. ÉPARGNE — 30%
-    ===================================== */
-
-    const savingRate =
-        income > 0
-            ? (savings / income) * 100
-            : 0;
-
-    // Objectif de référence : 20% d'épargne
-    const savingsScore = Math.min(
-        (savingRate / 20) * 100,
-        100
-    );
-
-    scores.push({
-        name: "savings",
-        score: savingsScore,
-        weight: 30
-    });
-
-
-    /* =====================================
-       2. DÉPENSES — 25%
-    ===================================== */
-
-    const expenseRate =
-        income > 0
-            ? (expenses / income) * 100
-            : 0;
-
-    /*
-       <= 50% des revenus dépensés :
-       excellente maîtrise.
-
-       100% ou plus :
-       score nul.
-    */
-
-    let expensesScore;
-
-    if (expenseRate <= 50) {
-
-        expensesScore = 100;
-
-    } else {
-
-        expensesScore =
-            Math.max(
-                0,
-                100 -
-                ((expenseRate - 50) / 50) * 100
-            );
-
-    }
-
-    scores.push({
-        name: "expenses",
-        score: expensesScore,
-        weight: 25
-    });
-
-
-    /* =====================================
-       3. BUSINESS — 20%
-    ===================================== */
-
-    let businessScore = null;
-
-    if (incomeTransactions.length >= 5) {
-
-        const ordered =
-            [...incomeTransactions].sort(
-                (a, b) =>
-                    new Date(a.date) -
-                    new Date(b.date)
-            );
-
-        const middle =
-            Math.floor(ordered.length / 2);
-
-        const firstPart =
-            ordered.slice(0, middle);
-
-        const secondPart =
-            ordered.slice(middle);
-
-
-        const firstAverage =
-            firstPart.reduce(
-                (total, transaction) =>
-                    total +
-                    Number(transaction.amount || 0),
-                0
-            ) /
-            Math.max(firstPart.length, 1);
-
-
-        const secondAverage =
-            secondPart.reduce(
-                (total, transaction) =>
-                    total +
-                    Number(transaction.amount || 0),
-                0
-            ) /
-            Math.max(secondPart.length, 1);
-
-
-        if (firstAverage > 0) {
-
-            const growth =
-                (
-                    (secondAverage - firstAverage)
-                    /
-                    firstAverage
-                ) * 100;
-
-
-            /*
-               +20% ou plus :
-               100
-
-               0% :
-               60
-
-               -20% ou moins :
-               20
-            */
-
-            businessScore =
-                Math.min(
-                    100,
-                    Math.max(
-                        20,
-                        60 + growth * 2
+    const dates =
+        savings
+
+            .map(
+                saving =>
+                    new Date(
+                        saving.date +
+                        "T00:00:00"
                     )
-                );
+            )
 
-        }
+            .filter(
+                date =>
+                    !Number.isNaN(
+                        date.getTime()
+                    )
+            );
+
+
+    if (!dates.length) {
+
+        return 0;
 
     }
 
 
-    if (businessScore !== null) {
-
-        scores.push({
-            name: "business",
-            score: businessScore,
-            weight: 20
-        });
-
-    }
+    const first =
+        Math.min(
+            ...dates.map(
+                date =>
+                    date.getTime()
+            )
+        );
 
 
-    /* =====================================
-       4. TRADING — 15%
-    ===================================== */
-
-    /*
-       Le module Trading n'est pas encore
-       suffisamment développé.
-
-       Donc aucune note fictive.
-    */
-
-    const tradingScore = null;
+    const last =
+        Math.max(
+            ...dates.map(
+                date =>
+                    date.getTime()
+            )
+        );
 
 
-    /* =====================================
-       5. RÉGULARITÉ — 10%
-    ===================================== */
-
-    let regularityScore = null;
-
-    if (incomeTransactions.length >= 5) {
-
-        const dates =
-            incomeTransactions
-                .map(
-                    transaction =>
-                        new Date(transaction.date)
-                )
-                .sort(
-                    (a, b) => a - b
-                );
-
-
-        const firstDate =
-            dates[0];
-
-        const lastDate =
-            dates[dates.length - 1];
-
-
-        const days =
-            Math.max(
-                1,
+    const weeks =
+        Math.max(
+            (
                 (
-                    lastDate - firstDate
+                    last -
+                    first
                 ) /
-                (1000 * 60 * 60 * 24)
-            );
-
-
-        /*
-           On mesure la fréquence moyenne
-           des encaissements.
-        */
-
-        const frequency =
-            incomeTransactions.length /
-            days;
-
-
-        regularityScore =
-            Math.min(
-                100,
-                Math.max(
-                    0,
-                    frequency * 30
-                )
-            );
-
-    }
-
-
-    if (regularityScore !== null) {
-
-        scores.push({
-            name: "regularity",
-            score: regularityScore,
-            weight: 10
-        });
-
-    }
-
-
-    /* =====================================
-       SCORE GLOBAL
-    ===================================== */
-
-    if (scores.length < 2) {
-
-        return null;
-
-    }
-
-
-    /*
-       On ne donne pas automatiquement
-       les points des critères inexistants.
-
-       Le score est calculé uniquement
-       avec les critères réellement disponibles.
-    */
-
-    const totalWeight =
-        scores.reduce(
-            (total, item) =>
-                total + item.weight,
-            0
-        );
-
-
-    const weightedScore =
-        scores.reduce(
-            (total, item) =>
-                total +
                 (
-                    item.score *
-                    item.weight
-                ),
-            0
+                    1000 *
+                    60 *
+                    60 *
+                    24 *
+                    7
+                )
+            ),
+            1
         );
 
 
-    const globalScore =
-        weightedScore /
-        totalWeight;
-
-
-    return {
-
-        global:
-            Math.round(globalScore),
-
-        savings:
-            Math.round(savingsScore),
-
-        expenses:
-            Math.round(expensesScore),
-
-        business:
-            businessScore === null
-                ? null
-                : Math.round(businessScore),
-
-        trading:
-            tradingScore,
-
-        regularity:
-            regularityScore === null
-                ? null
-                : Math.round(regularityScore)
-
-    };
+    return (
+        getSavingsTotal() /
+        weeks
+    );
 
 }
 
-/* =========================================
-   AFFICHAGE DU SCORE
-========================================= */
+
+function updateSidebarGoal(
+    savings,
+    goal
+) {
+
+    const safeGoal =
+        Math.max(
+            Number(goal) || APP_CONFIG.goal,
+            1
+        );
+
+
+    const percent =
+        Math.min(
+            (
+                savings /
+                safeGoal
+            ) * 100,
+            100
+        );
+
+
+    const progress =
+        document.getElementById(
+            "sidebarGoalProgress"
+        );
+
+
+    if (progress) {
+
+        progress.style.width =
+            `${percent}%`;
+
+    }
+
+
+    setText(
+        "sidebarGoalPercent",
+        `${percent.toFixed(1)} %`
+    );
+
+}
+
+
+/* =========================================================
+   8. SCORE FINANCIER
+========================================================= */
 
 function updateFinancialScore() {
 
-    const result =
-        calculateFinancialScore();
+    const income =
+        getIncomeTotal();
 
 
-    const score =
-        document.getElementById(
-            "financialScore"
-        );
+    const expenses =
+        getExpenseTotal();
 
-    const status =
-        document.getElementById(
-            "scoreStatus"
-        );
+
+    const savings =
+        getSavingsTotal();
+
+
+    const trading =
+        getTradingNet();
+
+
+    const transactionCount =
+        appData.transactions.length;
 
 
     /*
-       Pas assez de données
+       Aucun historique :
+       on ne fabrique aucun score.
     */
 
-    if (!result) {
+    if (
+        income === 0 &&
+        expenses === 0 &&
+        savings === 0 &&
+        transactionCount === 0
+    ) {
 
-        if (score) {
-
-            score.textContent = "—";
-
-        }
-
-        if (status) {
-
-            status.textContent =
-                "Pas encore assez de données";
-
-        }
+        setText(
+            "financialScore",
+            "—"
+        );
 
 
-        setScore(
+        setText(
+            "scoreStatus",
+            "Pas encore assez de données"
+        );
+
+
+        setText(
             "scoreSavings",
-            null
+            "—"
         );
 
-        setScore(
+
+        setText(
             "scoreExpenses",
-            null
+            "—"
         );
 
-        setScore(
+
+        setText(
             "scoreBusiness",
-            null
+            "—"
         );
 
-        setScore(
+
+        setText(
             "scoreTrading",
-            null
+            "—"
         );
 
-        setScore(
+
+        setText(
             "scoreRegularity",
-            null
+            "—"
         );
 
 
@@ -1180,116 +870,291 @@ function updateFinancialScore() {
     }
 
 
-    /*
-       Score global
-    */
+    /* -----------------------------------------
+       ÉPARGNE
+    ----------------------------------------- */
 
-    if (score) {
+    const savingRatio =
+        income > 0
+            ? (
+                savings /
+                income
+            )
+            : 0;
 
-        score.textContent =
-            result.global;
+
+    const savingScore =
+        Math.min(
+            savingRatio /
+            APP_CONFIG.recommendedSavingRate,
+            1
+        ) * 30;
+
+
+    /* -----------------------------------------
+       DÉPENSES
+    ----------------------------------------- */
+
+    let expenseScore = 20;
+
+
+    if (income > 0) {
+
+        const expenseRatio =
+            expenses /
+            income;
+
+
+        if (expenseRatio <= 0.5) {
+
+            expenseScore = 20;
+
+        } else if (
+            expenseRatio <= 0.7
+        ) {
+
+            expenseScore = 15;
+
+        } else if (
+            expenseRatio <= 0.9
+        ) {
+
+            expenseScore = 8;
+
+        } else {
+
+            expenseScore = 0;
+
+        }
 
     }
 
 
-    /*
-       Message
-    */
+    /* -----------------------------------------
+       BUSINESS
+    ----------------------------------------- */
 
-    if (status) {
+    const businessIncome =
+        appData.transactions
 
-        if (result.global >= 80) {
+            .filter(
+                transaction =>
+                    transaction.type === "income" &&
+                    transaction.category === "Business"
+            )
 
-            status.textContent =
-                "Excellente gestion";
+            .reduce(
 
-        }
+                (total, transaction) =>
 
-        else if (result.global >= 60) {
+                    total +
+                    (
+                        Number(
+                            transaction.amount
+                        ) || 0
+                    ),
 
-            status.textContent =
-                "Gestion correcte";
+                0
 
-        }
+            );
 
-        else if (result.global >= 40) {
 
-            status.textContent =
-                "Gestion à améliorer";
+    const businessScore =
+        income > 0
 
-        }
+            ? Math.min(
+                (
+                    businessIncome /
+                    income
+                ) * 20,
+                20
+            )
 
-        else {
+            : 0;
 
-            status.textContent =
-                "Situation préoccupante";
 
-        }
+    /* -----------------------------------------
+       TRADING
+    ----------------------------------------- */
+
+    let tradingScore = 0;
+
+
+    if (appData.trading.length > 0) {
+
+        tradingScore =
+            trading >= 0
+                ? 10
+                : 0;
 
     }
 
 
-    /*
-       Sous-scores
-    */
+    /* -----------------------------------------
+       RÉGULARITÉ
+    ----------------------------------------- */
 
-    setScore(
+    const regularityScore =
+        calculateRegularityScore();
+
+
+    const score =
+        Math.round(
+            Math.min(
+                savingScore +
+                expenseScore +
+                businessScore +
+                tradingScore +
+                regularityScore,
+                100
+            )
+        );
+
+
+    setText(
+        "financialScore",
+        score
+    );
+
+
+    setText(
         "scoreSavings",
-        result.savings
+        `${Math.round(
+            savingScore
+        )}/30`
     );
 
-    setScore(
+
+    setText(
         "scoreExpenses",
-        result.expenses
+        `${Math.round(
+            expenseScore
+        )}/20`
     );
 
-    setScore(
+
+    setText(
         "scoreBusiness",
-        result.business
+        `${Math.round(
+            businessScore
+        )}/20`
     );
 
-    setScore(
+
+    setText(
         "scoreTrading",
-        result.trading
+        `${Math.round(
+            tradingScore
+        )}/10`
     );
 
-    setScore(
+
+    setText(
         "scoreRegularity",
-        result.regularity
+        `${Math.round(
+            regularityScore
+        )}/20`
+    );
+
+
+    if (score >= 80) {
+
+        setText(
+            "scoreStatus",
+            "Très bonne gestion"
+        );
+
+    } else if (score >= 60) {
+
+        setText(
+            "scoreStatus",
+            "Gestion correcte"
+        );
+
+    } else if (score >= 40) {
+
+        setText(
+            "scoreStatus",
+            "À améliorer"
+        );
+
+    } else {
+
+        setText(
+            "scoreStatus",
+            "Gestion à surveiller"
+        );
+
+    }
+
+}
+
+
+function calculateRegularityScore() {
+
+    const transactions =
+        appData.transactions;
+
+
+    if (!transactions.length) {
+
+        return 0;
+
+    }
+
+
+    const uniqueDates =
+        new Set(
+
+            transactions.map(
+                transaction =>
+                    transaction.date
+            )
+
+        );
+
+
+    return Math.min(
+        uniqueDates.size * 4,
+        20
     );
 
 }
 
-/* =========================================
-   ALERTES INTELLIGENTES
-========================================= */
+
+/* =========================================================
+   9. ALERTES RÉELLES
+========================================================= */
 
 function updateAlerts() {
 
-    const alertList =
-        document.getElementById("alertList");
+    const container =
+        document.getElementById(
+            "alertList"
+        );
 
 
-    if (!alertList)
+    if (!container) {
+
         return;
+
+    }
 
 
     const income =
-        getTotalIncome();
+        getIncomeTotal();
+
 
     const expenses =
-        getTotalExpenses();
+        getExpenseTotal();
+
 
     const savings =
-        getTotalSavings();
+        getSavingsTotal();
 
 
     const alerts = [];
 
-
-    /*
-       Aucune donnée
-    */
 
     if (
         income === 0 &&
@@ -1297,25 +1162,34 @@ function updateAlerts() {
         savings === 0
     ) {
 
-        alerts.push({
+        container.innerHTML = `
 
-            type: "success",
+            <div class="alert-item success">
 
-            icon: "✓",
+                <div class="alert-icon">
+                    ✓
+                </div>
 
-            title: "Aucune donnée",
+                <div>
 
-            message:
-                "Commence par enregistrer tes revenus et tes dépenses."
+                    <strong>
+                        Aucune donnée enregistrée
+                    </strong>
 
-        });
+                    <p>
+                        Commence par enregistrer ton premier encaissement ou ta première dépense.
+                    </p>
+
+                </div>
+
+            </div>
+
+        `;
+
+        return;
 
     }
 
-
-    /*
-       Dépenses supérieures aux revenus
-    */
 
     if (
         income > 0 &&
@@ -1328,78 +1202,48 @@ function updateAlerts() {
 
             icon: "!",
 
-            title: "Dépenses trop élevées",
+            title:
+                "Dépenses supérieures aux revenus",
 
-            message:
-                "Tes dépenses dépassent actuellement tes revenus."
+            text:
+                "Tes dépenses enregistrées dépassent tes revenus."
 
         });
 
     }
 
 
-    /*
-       Pas encore d'épargne
-    */
-
     if (
         income > 0 &&
-        savings === 0
+        savings <
+        income *
+        APP_CONFIG.recommendedSavingRate
     ) {
 
         alerts.push({
 
-            type: "danger",
+            type: "warning",
 
             icon: "!",
 
-            title: "Aucune épargne enregistrée",
+            title:
+                "Épargne en dessous de la recommandation",
 
-            message:
-                "Tu as des revenus mais aucune épargne n'a encore été enregistrée."
+            text:
+                "La recommandation actuelle est de mettre de côté 30 % des revenus."
 
         });
 
     }
 
 
-    /*
-       Bon taux d'épargne
-    */
-
-    if (income > 0) {
-
-        const rate =
-            (savings / income) * 100;
-
-
-        if (rate >= 20) {
-
-            alerts.push({
-
-                type: "success",
-
-                icon: "✓",
-
-                title: "Bonne épargne",
-
-                message:
-                    "Ton taux d'épargne actuel est de " +
-                    rate.toFixed(1) +
-                    " %."
-
-            });
-
-        }
-
-    }
-
-
-    /*
-       Si aucune alerte
-    */
-
-    if (alerts.length === 0) {
+    if (
+        income > 0 &&
+        expenses <= income &&
+        savings >=
+        income *
+        APP_CONFIG.recommendedSavingRate
+    ) {
 
         alerts.push({
 
@@ -1407,496 +1251,1350 @@ function updateAlerts() {
 
             icon: "✓",
 
-            title: "Aucun problème détecté",
+            title:
+                "Bonne discipline financière",
 
-            message:
-                "Continue à enregistrer régulièrement tes opérations."
+            text:
+                "Tes dépenses restent sous tes revenus et ton épargne atteint la recommandation."
 
         });
 
     }
 
 
-    alertList.innerHTML =
-        alerts.map(alert => `
+    if (!alerts.length) {
 
-            <div class="alert-item ${alert.type}">
+        alerts.push({
 
-                <div class="alert-icon">
-                    ${alert.icon}
+            type: "success",
+
+            icon: "✓",
+
+            title:
+                "Aucune alerte critique",
+
+            text:
+                "Continue à enregistrer tes opérations réelles."
+
+        });
+
+    }
+
+
+    container.innerHTML =
+        alerts.map(
+            alert => `
+
+                <div class="alert-item ${escapeHTML(
+                    alert.type
+                )}">
+
+                    <div class="alert-icon">
+                        ${escapeHTML(
+                            alert.icon
+                        )}
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            ${escapeHTML(
+                                alert.title
+                            )}
+                        </strong>
+
+                        <p>
+                            ${escapeHTML(
+                                alert.text
+                            )}
+                        </p>
+
+                    </div>
+
                 </div>
 
-                <div>
-
-                    <strong>
-                        ${alert.title}
-                    </strong>
-
-                    <p>
-                        ${alert.message}
-                    </p>
-
-                </div>
-
-            </div>
-
-        `).join("");
+            `
+        ).join("");
 
 }
 
 
-/* =========================================
-   MISE À JOUR COMPLÈTE
-========================================= */
-
-function refreshFinancialDashboard() {
-
-    updateDashboard();
-
-    updateGoal();
-
-    updateSavingRate();
-
-    updateBalanceStatus();
-
-    updateFinancialScore();
-
-    updateAlerts();
-
-}
-
-/* =========================================
-   GRAPHIQUE — ÉVOLUTION FINANCIÈRE
-========================================= */
-
-let currentChartPeriod = "7";
-
-
-/* =========================================
-   RÉCUPÉRER LES DONNÉES
-========================================= */
-
-function getChartTransactions() {
-
-    return appData.transactions || [];
-
-}
-
-
-function getChartSavings() {
-
-    return appData.savings || [];
-
-}
-
-
-/* =========================================
-   DATE DE DÉBUT
-========================================= */
-
-function getPeriodStart(period) {
-
-    const now = new Date();
-
-    const start = new Date(now);
-
-
-    switch (period) {
-
-        case "7":
-
-            start.setDate(
-                start.getDate() - 6
-            );
-
-            break;
-
-
-        case "30":
-
-            start.setDate(
-                start.getDate() - 29
-            );
-
-            break;
-
-
-        case "3m":
-
-            start.setMonth(
-                start.getMonth() - 3
-            );
-
-            break;
-
-
-        case "6m":
-
-            start.setMonth(
-                start.getMonth() - 6
-            );
-
-            break;
-
-
-        case "1y":
-
-            start.setFullYear(
-                start.getFullYear() - 1
-            );
-
-            break;
-
-    }
-
-
-    start.setHours(0, 0, 0, 0);
-
-    return start;
-
-}
-
-
-/* =========================================
-   FORMAT DE DATE
-========================================= */
-
-function dateKey(date) {
-
-    const year =
-        date.getFullYear();
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
-
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-/* =========================================
-   CRÉER LES PÉRIODES
-========================================= */
-
-function createChartPeriods(period) {
-
-    const now = new Date();
-
-    const start =
-        getPeriodStart(period);
-
-
-    const periods = [];
-
-
-    /*
-       7 JOURS
-    */
-
-    if (period === "7") {
-
-        let current =
-            new Date(start);
-
-
-        while (current <= now) {
-
-            periods.push({
-
-                key: dateKey(current),
-
-                date: new Date(current)
-
-            });
-
-
-            current.setDate(
-                current.getDate() + 1
-            );
-
-        }
-
-    }
-
-
-    /*
-       30 JOURS
-    */
-
-    else if (period === "30") {
-
-        let current =
-            new Date(start);
-
-
-        while (current <= now) {
-
-            periods.push({
-
-                key: dateKey(current),
-
-                date: new Date(current)
-
-            });
-
-
-            current.setDate(
-                current.getDate() + 1
-            );
-
-        }
-
-    }
-
-
-    /*
-       3 / 6 / 12 MOIS
-    */
-
-    else {
-
-        let current =
-            new Date(
-                start.getFullYear(),
-                start.getMonth(),
-                1
-            );
-
-
-        while (current <= now) {
-
-            periods.push({
-
-                key:
-                    `${current.getFullYear()}-${String(
-                        current.getMonth() + 1
-                    ).padStart(2, "0")}`,
-
-                date:
-                    new Date(current)
-
-            });
-
-
-            current.setMonth(
-                current.getMonth() + 1
-            );
-
-        }
-
-    }
-
-
-    return periods;
-
-}
-
-
-/* =========================================
-   AGRÉGER LES DONNÉES
-========================================= */
-
-function buildChartData(period) {
-
-    const periods =
-        createChartPeriods(period);
-
-
-    const transactions =
-        getChartTransactions();
-
-
-    const savings =
-        getChartSavings();
-
-
-    let cumulativeIncome = 0;
-
-    let cumulativeExpenses = 0;
-
-    let cumulativeSavings = 0;
-
-
-    const data = periods.map(item => {
-
-        let income = 0;
-
-        let expense = 0;
-
-        let saving = 0;
-
-
-        transactions.forEach(transaction => {
-
-            const transactionDate =
-                new Date(transaction.date);
-
-
-            let matches = false;
-
-
-            if (
-                period === "7" ||
-                period === "30"
-            ) {
-
-                matches =
-                    dateKey(transactionDate)
-                    === item.key;
-
-            }
-
-            else {
-
-                matches =
-                    `${transactionDate.getFullYear()}-${String(
-                        transactionDate.getMonth() + 1
-                    ).padStart(2, "0")}`
-                    === item.key;
-
-            }
-
-
-            if (!matches)
-                return;
-
-
-            if (
-                transaction.type === "income"
-            ) {
-
-                income +=
-                    Number(transaction.amount) || 0;
-
-            }
-
-
-            if (
-                transaction.type === "expense"
-            ) {
-
-                expense +=
-                    Number(transaction.amount) || 0;
-
-            }
-
-        });
-
-
-        savings.forEach(itemSaving => {
-
-            const savingDate =
-                new Date(itemSaving.date);
-
-
-            let matches = false;
-
-
-            if (
-                period === "7" ||
-                period === "30"
-            ) {
-
-                matches =
-                    dateKey(savingDate)
-                    === item.key;
-
-            }
-
-            else {
-
-                matches =
-                    `${savingDate.getFullYear()}-${String(
-                        savingDate.getMonth() + 1
-                    ).padStart(2, "0")}`
-                    === item.key;
-
-            }
-
-
-            if (matches) {
-
-                saving +=
-                    Number(itemSaving.amount) || 0;
-
-            }
-
-        });
-
-
-        cumulativeIncome += income;
-
-        cumulativeExpenses += expense;
-
-        cumulativeSavings += saving;
-
-
-        return {
-
-            label: formatChartLabel(item.date, period),
-
-            income: cumulativeIncome,
-
-            expense: cumulativeExpenses,
-
-            saving: cumulativeSavings
-
-        };
-
-    });
-
-
-    return data;
-
-}
-
-
-/* =========================================
-   LABELS
-========================================= */
-
-function formatChartLabel(date, period) {
-
-    if (
-        period === "3m" ||
-        period === "6m" ||
-        period === "1y"
-    ) {
-
-        return date.toLocaleDateString(
-            "fr-FR",
-            {
-                month: "short"
-            }
+/* =========================================================
+   10. MODAL AJOUTER UNE ENTRÉE
+========================================================= */
+
+function initializeIncomeModal() {
+
+    const modal =
+        document.getElementById(
+            "incomeModal"
         );
 
+
+    const form =
+        document.getElementById(
+            "incomeForm"
+        );
+
+
+    const closeButton =
+        document.getElementById(
+            "closeIncomeModal"
+        );
+
+
+    const cancelButton =
+        document.getElementById(
+            "cancelIncome"
+        );
+
+
+    if (!modal || !form) {
+
+        return;
+
     }
 
 
-    return date.toLocaleDateString(
-        "fr-FR",
-        {
-            day: "numeric",
-            month: "short"
+    /*
+       Tous les boutons contenant
+       "Ajouter une entrée"
+    */
+
+    const openButtons =
+        Array.from(
+            document.querySelectorAll(
+                ".nav-item, .quick-action"
+            )
+        ).filter(
+            button =>
+                button.textContent
+                    .toLowerCase()
+                    .includes(
+                        "ajouter une entrée"
+                    )
+        );
+
+
+    openButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    openModal(modal);
+
+                }
+            );
+
+        }
+    );
+
+
+    closeButton?.addEventListener(
+        "click",
+        () => closeModal(modal)
+    );
+
+
+    cancelButton?.addEventListener(
+        "click",
+        () => closeModal(modal)
+    );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                closeModal(modal);
+
+            }
+
+        }
+    );
+
+
+    const amountInput =
+        document.getElementById(
+            "incomeAmount"
+        );
+
+
+    amountInput?.addEventListener(
+        "input",
+        updateSavingPreview
+    );
+
+
+    /*
+       Date actuelle par défaut
+    */
+
+    setDefaultDate(
+        "incomeDate"
+    );
+
+
+    form.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            addIncome();
+
         }
     );
 
 }
 
 
-/* =========================================
-   DESSINER LE GRAPHIQUE
-========================================= */
+/* =========================================================
+   11. AJOUTER UNE ENTRÉE
+========================================================= */
 
-function renderFinancialChart() {
+function addIncome() {
+
+    const amount =
+        Number(
+            document.getElementById(
+                "incomeAmount"
+            )?.value
+        );
+
+
+    const source =
+        document.getElementById(
+            "incomeSource"
+        )?.value.trim();
+
+
+    const category =
+        document.getElementById(
+            "incomeCategory"
+        )?.value;
+
+
+    const date =
+        document.getElementById(
+            "incomeDate"
+        )?.value;
+
+
+    const note =
+        document.getElementById(
+            "incomeNote"
+        )?.value.trim();
+
+
+    if (
+        !amount ||
+        amount <= 0 ||
+        !source ||
+        !date
+    ) {
+
+        alert(
+            "Veuillez remplir correctement les champs obligatoires."
+        );
+
+        return;
+
+    }
+
+
+    const transaction = {
+
+        id:
+            createID(),
+
+        type:
+            "income",
+
+        amount:
+            amount,
+
+        source:
+            source,
+
+        category:
+            category || "Autre",
+
+        date:
+            date,
+
+        note:
+            note,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    appData.transactions.push(
+        transaction
+    );
+
+
+    saveData();
+
+
+    const modal =
+        document.getElementById(
+            "incomeModal"
+        );
+
+
+    closeModal(modal);
+
+
+    resetIncomeForm();
+
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   12. APERÇU ÉPARGNE RECOMMANDÉE
+========================================================= */
+
+function updateSavingPreview() {
+
+    const amount =
+        Number(
+            document.getElementById(
+                "incomeAmount"
+            )?.value
+        ) || 0;
+
+
+    const recommended =
+        amount *
+        APP_CONFIG.recommendedSavingRate;
+
+
+    const preview =
+        document.querySelector(
+            "#savingPreview strong"
+        );
+
+
+    if (preview) {
+
+        preview.textContent =
+            formatMoney(
+                recommended
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   13. RÉINITIALISER FORMULAIRE REVENU
+========================================================= */
+
+function resetIncomeForm() {
+
+    const form =
+        document.getElementById(
+            "incomeForm"
+        );
+
+
+    if (form) {
+
+        form.reset();
+
+    }
+
+
+    setDefaultDate(
+        "incomeDate"
+    );
+
+
+    const preview =
+        document.querySelector(
+            "#savingPreview strong"
+        );
+
+
+    if (preview) {
+
+        preview.textContent =
+            "0 F";
+
+    }
+
+}
+
+
+/* =========================================================
+   14. MODAL AJOUTER UNE DÉPENSE
+========================================================= */
+
+function initializeExpenseModal() {
+
+    const modal =
+        document.getElementById(
+            "expenseModal"
+        );
+
+
+    const form =
+        document.getElementById(
+            "expenseForm"
+        );
+
+
+    const closeButton =
+        document.getElementById(
+            "closeExpenseModal"
+        );
+
+
+    const cancelButton =
+        document.getElementById(
+            "cancelExpense"
+        );
+
+
+    const openButton =
+        document.getElementById(
+            "openExpenseModal"
+        );
+
+
+    if (!modal || !form) {
+
+        return;
+
+    }
+
+
+    /*
+       Bouton sidebar
+    */
+
+    openButton?.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            openModal(modal);
+
+        }
+    );
+
+
+    /*
+       Bouton rapide Dashboard
+    */
+
+    const quickExpenseButtons =
+        Array.from(
+            document.querySelectorAll(
+                ".quick-action"
+            )
+        ).filter(
+            button =>
+                button.textContent
+                    .toLowerCase()
+                    .includes(
+                        "ajouter une dépense"
+                    )
+        );
+
+
+    quickExpenseButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                event => {
+
+                    event.preventDefault();
+
+                    openModal(modal);
+
+                }
+            );
+
+        }
+    );
+
+
+    closeButton?.addEventListener(
+        "click",
+        () => closeModal(modal)
+    );
+
+
+    cancelButton?.addEventListener(
+        "click",
+        () => closeModal(modal)
+    );
+
+
+    modal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === modal
+            ) {
+
+                closeModal(modal);
+
+            }
+
+        }
+    );
+
+
+    setDefaultDate(
+        "expenseDate"
+    );
+
+
+    form.addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            addExpense();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   15. AJOUTER UNE DÉPENSE
+========================================================= */
+
+function addExpense() {
+
+    const amount =
+        Number(
+            document.getElementById(
+                "expenseAmount"
+            )?.value
+        );
+
+
+    const category =
+        document.getElementById(
+            "expenseCategory"
+        )?.value;
+
+
+    const date =
+        document.getElementById(
+            "expenseDate"
+        )?.value;
+
+
+    const note =
+        document.getElementById(
+            "expenseNote"
+        )?.value.trim();
+
+
+    if (
+        !amount ||
+        amount <= 0 ||
+        !category ||
+        !date
+    ) {
+
+        alert(
+            "Veuillez remplir correctement les champs obligatoires."
+        );
+
+        return;
+
+    }
+
+
+    const transaction = {
+
+        id:
+            createID(),
+
+        type:
+            "expense",
+
+        amount:
+            amount,
+
+        category:
+            category,
+
+        date:
+            date,
+
+        note:
+            note,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    appData.transactions.push(
+        transaction
+    );
+
+
+    saveData();
+
+
+    const modal =
+        document.getElementById(
+            "expenseModal"
+        );
+
+
+    closeModal(modal);
+
+
+    resetExpenseForm();
+
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   16. RÉINITIALISER FORMULAIRE DÉPENSE
+========================================================= */
+
+function resetExpenseForm() {
+
+    const form =
+        document.getElementById(
+            "expenseForm"
+        );
+
+
+    if (form) {
+
+        form.reset();
+
+    }
+
+
+    setDefaultDate(
+        "expenseDate"
+    );
+
+}
+
+
+/* =========================================================
+   17. MODALS
+========================================================= */
+
+function openModal(modal) {
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    modal.classList.add(
+        "show"
+    );
+
+}
+
+
+function closeModal(modal) {
+
+    if (!modal) {
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "show"
+    );
+
+}
+
+
+function setDefaultDate(id) {
+
+    const input =
+        document.getElementById(id);
+
+
+    if (
+        input &&
+        !input.value
+    ) {
+
+        input.value =
+            getTodayISO();
+
+    }
+
+}
+
+
+function createID() {
+
+    return (
+
+        Date.now().toString(36)
+
+        +
+
+        Math.random()
+            .toString(36)
+            .substring(2, 8)
+
+    );
+
+}
+
+
+/* =========================================================
+   18. HISTORIQUE
+========================================================= */
+
+let currentHistoryFilter =
+    "all";
+
+
+function initializeHistory() {
+
+    const historyButton =
+        document.getElementById(
+            "openHistory"
+        );
+
+
+    const historyView =
+        document.getElementById(
+            "historyView"
+        );
+
+
+    if (!historyButton || !historyView) {
+
+        return;
+
+    }
+
+
+    historyButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            showView(
+                "history"
+            );
+
+        }
+    );
+
+
+    const filters =
+        document.querySelectorAll(
+            ".history-filter"
+        );
+
+
+    filters.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    filters.forEach(
+                        item =>
+                            item.classList.remove(
+                                "active"
+                            )
+                    );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    currentHistoryFilter =
+                        button.dataset.historyFilter ||
+                        "all";
+
+
+                    renderHistory(
+                        currentHistoryFilter
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    renderHistory(
+        "all"
+    );
+
+}
+
+
+function renderHistory(
+    filter = "all"
+) {
+
+    const list =
+        document.getElementById(
+            "historyList"
+        );
+
+
+    if (!list) {
+
+        return;
+
+    }
+
+
+    let transactions =
+        [...appData.transactions];
+
+
+    if (
+        filter === "income" ||
+        filter === "expense"
+    ) {
+
+        transactions =
+            transactions.filter(
+                transaction =>
+                    transaction.type === filter
+            );
+
+    }
+
+
+    transactions.sort(
+        (a, b) => {
+
+            const dateA =
+                new Date(
+                    `${a.date}T00:00:00`
+                ).getTime();
+
+
+            const dateB =
+                new Date(
+                    `${b.date}T00:00:00`
+                ).getTime();
+
+
+            return dateB - dateA;
+
+        }
+    );
+
+
+    const income =
+        getIncomeTotal();
+
+
+    const expenses =
+        getExpenseTotal();
+
+
+    setText(
+        "historyIncomeTotal",
+        formatMoney(income)
+    );
+
+
+    setText(
+        "historyExpenseTotal",
+        formatMoney(expenses)
+    );
+
+
+    setText(
+        "historyBalance",
+        formatMoney(
+            income -
+            expenses
+        )
+    );
+
+
+    if (!transactions.length) {
+
+        list.innerHTML = `
+
+            <div class="history-empty">
+
+                <strong>
+                    Aucune transaction
+                </strong>
+
+                <span>
+                    Aucune opération enregistrée pour le moment.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    list.innerHTML =
+
+        transactions.map(
+            transaction => {
+
+                const amount =
+                    Number(
+                        transaction.amount
+                    ) || 0;
+
+
+                const isIncome =
+                    transaction.type ===
+                    "income";
+
+
+                const title =
+                    isIncome
+
+                        ? (
+                            transaction.source ||
+                            transaction.category ||
+                            "Revenu"
+                        )
+
+                        : (
+                            transaction.category ||
+                            "Dépense"
+                        );
+
+
+                const note =
+                    transaction.note ||
+                    "";
+
+
+                return `
+
+                    <div
+                        class="history-item ${
+                            isIncome
+                                ? "history-income"
+                                : "history-expense"
+                        }"
+                    >
+
+                        <div class="history-item-info">
+
+                            <strong>
+                                ${escapeHTML(
+                                    title
+                                )}
+                            </strong>
+
+                            <span>
+                                ${escapeHTML(
+                                    formatDate(
+                                        transaction.date
+                                    )
+                                )}
+                            </span>
+
+                            ${
+                                note
+                                    ? `
+                                        <small>
+                                            ${escapeHTML(
+                                                note
+                                            )}
+                                        </small>
+                                      `
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <strong class="history-amount">
+
+                            ${
+                                isIncome
+                                    ? "+"
+                                    : "-"
+                            }${formatMoney(amount)}
+
+                        </strong>
+
+
+                        <button
+                            type="button"
+                            class="history-delete"
+                            data-delete-id="${
+                                escapeHTML(
+                                    transaction.id
+                                )
+                            }"
+                            title="Supprimer"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
+
+
+    /*
+       Boutons suppression
+    */
+
+    list.querySelectorAll(
+        ".history-delete"
+    ).forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    deleteTransaction(
+                        button.dataset.deleteId
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   19. SUPPRESSION TRANSACTION
+========================================================= */
+
+function deleteTransaction(id) {
+
+    const transaction =
+        appData.transactions.find(
+            item =>
+                item.id === id
+        );
+
+
+    if (!transaction) {
+
+        return;
+
+    }
+
+
+    const amount =
+        formatMoney(
+            transaction.amount
+        );
+
+
+    const confirmed =
+        confirm(
+            `Supprimer cette opération de ${amount} ?`
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    appData.transactions =
+        appData.transactions.filter(
+            item =>
+                item.id !== id
+        );
+
+
+    saveData();
+
+
+    updateDashboard();
+
+}
+
+
+/* =========================================================
+   20. NAVIGATION DASHBOARD / HISTORIQUE
+========================================================= */
+
+function initializeNavigation() {
+
+    const dashboardButton =
+        document.getElementById(
+            "openDashboard"
+        );
+
+
+    if (!dashboardButton) {
+
+        return;
+
+    }
+
+
+    dashboardButton.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            showView(
+                "dashboard"
+            );
+
+        }
+    );
+
+}
+
+
+function showView(view) {
+
+    const dashboard =
+        document.querySelector(
+            ".dashboard"
+        );
+
+
+    const history =
+        document.getElementById(
+            "historyView"
+        );
+
+
+    const dashboardButton =
+        document.getElementById(
+            "openDashboard"
+        );
+
+
+    const historyButton =
+        document.getElementById(
+            "openHistory"
+        );
+
+
+    if (view === "dashboard") {
+
+        if (dashboard) {
+
+            dashboard.style.display =
+                "";
+
+        }
+
+
+        if (history) {
+
+            history.style.display =
+                "none";
+
+        }
+
+
+        dashboardButton?.classList.add(
+            "active"
+        );
+
+
+        historyButton?.classList.remove(
+            "active"
+        );
+
+
+        return;
+
+    }
+
+
+    if (view === "history") {
+
+        if (dashboard) {
+
+            dashboard.style.display =
+                "none";
+
+        }
+
+
+        if (history) {
+
+            history.style.display =
+                "block";
+
+        }
+
+
+        dashboardButton?.classList.remove(
+            "active"
+        );
+
+
+        historyButton?.classList.add(
+            "active"
+        );
+
+
+        renderHistory(
+            currentHistoryFilter
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   21. GRAPHIQUE
+========================================================= */
+
+let currentChartPeriod =
+    7;
+
+
+function initializeChart() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".period-button"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    buttons.forEach(
+                        item =>
+                            item.classList.remove(
+                                "active"
+                            )
+                    );
+
+
+                    button.classList.add(
+                        "active"
+                    );
+
+
+                    const period =
+                        button.dataset.period;
+
+
+                    currentChartPeriod =
+                        parsePeriod(
+                            period
+                        );
+
+
+                    updateFinancialChart();
+
+                }
+            );
+
+        }
+    );
+
+
+    updateFinancialChart();
+
+}
+
+
+function parsePeriod(
+    period
+) {
+
+    if (period === "3m") {
+
+        return 90;
+
+    }
+
+
+    if (period === "6m") {
+
+        return 180;
+
+    }
+
+
+    if (period === "1y") {
+
+        return 365;
+
+    }
+
+
+    return (
+        Number(period) || 7
+    );
+
+}
+
+
+function updateFinancialChart() {
 
     const svg =
         document.getElementById(
@@ -1904,13 +2602,9 @@ function renderFinancialChart() {
         );
 
 
-    if (!svg)
-        return;
-
-
-    const data =
-        buildChartData(
-            currentChartPeriod
+    const empty =
+        document.getElementById(
+            "chartEmpty"
         );
 
 
@@ -1919,78 +2613,132 @@ function renderFinancialChart() {
             "incomeLine"
         );
 
+
     const expenseLine =
         document.getElementById(
             "expenseLine"
         );
+
 
     const savingLine =
         document.getElementById(
             "savingLine"
         );
 
+
     const labels =
         document.getElementById(
             "chartLabels"
         );
 
-    const empty =
+
+    const pointsGroup =
         document.getElementById(
-            "chartEmpty"
+            "chartPoints"
         );
 
 
-    /*
-       Aucune opération
-    */
-
     if (
-        data.length === 0 ||
-        getChartTransactions().length === 0
+        !svg ||
+        !incomeLine ||
+        !expenseLine ||
+        !savingLine
     ) {
-
-        svg.style.display = "none";
-
-        empty.classList.remove("hidden");
-
-        labels.innerHTML = "";
 
         return;
 
     }
 
 
-    svg.style.display = "block";
-
-    empty.classList.add("hidden");
-
-
-    /*
-       Dimensions SVG
-    */
-
-    const width = 800;
-
-    const height = 300;
-
-    const paddingTop = 20;
-
-    const paddingBottom = 35;
+    const data =
+        buildChartData(
+            currentChartPeriod
+        );
 
 
-    /*
-       Trouver le maximum
-    */
+    if (!data.length) {
+
+        incomeLine.setAttribute(
+            "points",
+            ""
+        );
+
+
+        expenseLine.setAttribute(
+            "points",
+            ""
+        );
+
+
+        savingLine.setAttribute(
+            "points",
+            ""
+        );
+
+
+        if (pointsGroup) {
+
+            pointsGroup.innerHTML =
+                "";
+
+        }
+
+
+        if (labels) {
+
+            labels.innerHTML =
+                "";
+
+        }
+
+
+        if (empty) {
+
+            empty.style.display =
+                "flex";
+
+        }
+
+
+        return;
+
+    }
+
+
+    if (empty) {
+
+        empty.style.display =
+            "none";
+
+    }
+
+
+    const width =
+        800;
+
+
+    const height =
+        300;
+
+
+    const paddingX =
+        25;
+
+
+    const paddingY =
+        25;
+
 
     const maxValue =
         Math.max(
 
-            ...data.map(item =>
-                Math.max(
-                    item.income,
-                    item.expense,
-                    item.saving
-                )
+            ...data.map(
+                point =>
+                    Math.max(
+                        point.income,
+                        point.expense,
+                        point.saving
+                    )
             ),
 
             1
@@ -1998,66 +2746,75 @@ function renderFinancialChart() {
         );
 
 
-    /*
-       Convertir valeur → coordonnées
-    */
+    const xStep =
+        data.length > 1
 
-    function getPoint(value, index) {
+            ? (
+                (
+                    width -
+                    paddingX * 2
+                ) /
+                (
+                    data.length - 1
+                )
+            )
 
-        const x =
-            data.length === 1
-                ? width / 2
-                : (index / (data.length - 1))
-                  * width;
-
-
-        const usableHeight =
-            height -
-            paddingTop -
-            paddingBottom;
+            : 0;
 
 
-        const y =
-            paddingTop +
-            usableHeight -
+    function getX(index) {
+
+        return (
+            paddingX +
             (
-                value / maxValue
-            ) *
-            usableHeight;
+                xStep *
+                index
+            )
+        );
+
+    }
 
 
-        return `${x},${y}`;
+    function getY(value) {
+
+        return (
+
+            height -
+            paddingY -
+            (
+                (
+                    value /
+                    maxValue
+                ) *
+                (
+                    height -
+                    paddingY * 2
+                )
+            )
+
+        );
 
     }
 
 
     const incomePoints =
         data.map(
-            (item, index) =>
-                getPoint(
-                    item.income,
-                    index
-                )
+            (point, index) =>
+                `${getX(index)},${getY(point.income)}`
         ).join(" ");
 
 
     const expensePoints =
         data.map(
-            (item, index) =>
-                getPoint(
-                    item.expense,
-                    index
-                )
+            (point, index) =>
+                `${getX(index)},${getY(point.expense)}`
         ).join(" ");
 
 
     const savingPoints =
         data.map(
-            (item, index) =>
-                getPoint(
-                    item.saving,
-                    index
-                )
+            (point, index) =>
+                `${getX(index)},${getY(point.saving)}`
         ).join(" ");
 
 
@@ -2080,907 +2837,648 @@ function renderFinancialChart() {
 
 
     /*
+       Points
+    */
+
+    if (pointsGroup) {
+
+        pointsGroup.innerHTML =
+            data.map(
+                (point, index) => {
+
+                    return `
+
+                        <circle
+                            cx="${getX(index)}"
+                            cy="${getY(point.income)}"
+                            r="3"
+                            class="chart-point-income"
+                        />
+
+                        <circle
+                            cx="${getX(index)}"
+                            cy="${getY(point.expense)}"
+                            r="3"
+                            class="chart-point-expense"
+                        />
+
+                    `;
+
+                }
+            ).join("");
+
+    }
+
+
+    /*
        Labels
     */
 
-    labels.innerHTML =
-        data.map(item => {
+    if (labels) {
 
-            return `
-                <span>
-                    ${item.label}
-                </span>
-            `;
+        labels.innerHTML =
+            createChartLabels(
+                data
+            );
 
-        }).join("");
+    }
+
+}
 
 
-    /*
-       Limiter le nombre de labels
-       pour les longues périodes.
-    */
+function buildChartData(
+    days
+) {
 
-    if (data.length > 8) {
+    const end =
+        new Date();
 
-        const labelElements =
-            labels.querySelectorAll(
-                "span"
+
+    end.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+
+    const start =
+        new Date(end);
+
+
+    start.setDate(
+        start.getDate() -
+        (
+            days - 1
+        )
+    );
+
+
+    const buckets = [];
+
+
+    for (
+        let index = 0;
+        index < days;
+        index++
+    ) {
+
+        const date =
+            new Date(start);
+
+
+        date.setDate(
+            start.getDate() +
+            index
+        );
+
+
+        const key =
+            toISODate(
+                date
             );
 
 
-        labelElements.forEach(
-            (element, index) => {
+        buckets.push({
 
-                if (
-                    index !== 0 &&
-                    index !== data.length - 1 &&
-                    index % Math.ceil(
-                        data.length / 6
-                    ) !== 0
-                ) {
+            date:
+                key,
 
-                    element.style.visibility =
-                        "hidden";
+            income:
+                0,
 
-                }
+            expense:
+                0,
 
-            }
-        );
+            saving:
+                0
+
+        });
 
     }
 
-}
+
+    const map =
+        new Map();
 
 
-/* =========================================
-   BOUTONS 7J / 30J / 3M / 6M / 1AN
-========================================= */
+    buckets.forEach(
+        bucket => {
 
-function initializeChartPeriods() {
-
-    const buttons =
-        document.querySelectorAll(
-            ".period-button"
-        );
-
-
-    buttons.forEach(button => {
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                /*
-                   Retirer active
-                */
-
-                buttons.forEach(
-                    item =>
-                        item.classList.remove(
-                            "active"
-                        )
-                );
-
-
-                /*
-                   Activer le bouton
-                */
-
-                button.classList.add(
-                    "active"
-                );
-
-
-                /*
-                   Nouvelle période
-                */
-
-                currentChartPeriod =
-                    button.dataset.period;
-
-
-                /*
-                   Redessiner
-                */
-
-                renderFinancialChart();
-
-            }
-        );
-
-    });
-
-}
-
-
-/* =========================================
-   INITIALISATION GRAPHIQUE
-========================================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    console.log("Million Tracker chargé.");
-
-    updateDashboard();
-
-    initializeExpenseModal();
-
-    initializeHistory();
-
-    initializeMainNavigation();
-});
-
-/* =========================================
-   DATE ACTUELLE DU DASHBOARD
-========================================= */
-
-function updateCurrentDate() {
-
-    const dateElement =
-        document.getElementById("currentDate");
-
-
-    if (!dateElement)
-        return;
-
-
-    const today = new Date();
-
-
-    const formattedDate =
-        today.toLocaleDateString(
-            "fr-FR",
-            {
-                day: "numeric",
-                month: "long",
-                year: "numeric"
-            }
-        );
-
-
-    dateElement.textContent =
-        formattedDate.toUpperCase();
-
-}
-
-/* =========================================
-   AJOUTER UNE DÉPENSE
-========================================= */
-
-function initializeExpenseModal() {
-
-    const modal =
-        document.getElementById("expenseModal");
-
-    const openButton =
-        document.getElementById("openExpenseModal");
-
-    const closeButton =
-        document.getElementById("closeExpenseModal");
-
-    const cancelButton =
-        document.getElementById("cancelExpense");
-
-    const form =
-        document.getElementById("expenseForm");
-
-    const dateInput =
-        document.getElementById("expenseDate");
-
-
-    if (
-        !modal ||
-        !openButton ||
-        !closeButton ||
-        !cancelButton ||
-        !form
-    ) {
-        return;
-    }
-
-
-    /* =========================
-       OUVRIR
-    ========================= */
-
-    openButton.addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
-
-           modal.classList.add("show");
-
-            /*
-               Date réelle du jour.
-               Aucune date fictive.
-            */
-
-            if (dateInput) {
-
-                const today =
-                    new Date();
-
-                const year =
-                    today.getFullYear();
-
-                const month =
-                    String(
-                        today.getMonth() + 1
-                    ).padStart(2, "0");
-
-                const day =
-                    String(
-                        today.getDate()
-                    ).padStart(2, "0");
-
-                dateInput.value =
-                    `${year}-${month}-${day}`;
-            }
+            map.set(
+                bucket.date,
+                bucket
+            );
 
         }
     );
 
 
-    /* =========================
-       FERMER
-    ========================= */
-
-    function closeExpenseModal() {
-
-        modal.classList.remove("show");
-
-        form.reset();
-
-    }
-
-
-    closeButton.addEventListener(
-        "click",
-        closeExpenseModal
-    );
-
-
-    cancelButton.addEventListener(
-        "click",
-        closeExpenseModal
-    );
-
-
-    /*
-       Fermer en cliquant à l'extérieur
-    */
-
-    modal.addEventListener(
-        "click",
-        function(event) {
+    appData.transactions.forEach(
+        transaction => {
 
             if (
-                event.target === modal
+                !map.has(
+                    transaction.date
+                )
             ) {
 
-                closeExpenseModal();
+                return;
 
             }
 
-        }
-    );
 
-
-    /* =========================
-       ENREGISTRER
-    ========================= */
-
-    form.addEventListener(
-        "submit",
-        function(event) {
-
-            event.preventDefault();
+            const bucket =
+                map.get(
+                    transaction.date
+                );
 
 
             const amount =
                 Number(
-                    document.getElementById(
-                        "expenseAmount"
-                    ).value
-                );
+                    transaction.amount
+                ) || 0;
 
-
-            const category =
-                document.getElementById(
-                    "expenseCategory"
-                ).value;
-
-
-            const date =
-                document.getElementById(
-                    "expenseDate"
-                ).value;
-
-
-            const note =
-                document.getElementById(
-                    "expenseNote"
-                ).value.trim();
-
-
-            /*
-               Vérifications
-            */
 
             if (
-                !amount ||
-                amount <= 0
+                transaction.type ===
+                "income"
             ) {
 
-                alert(
-                    "Entre un montant valide."
-                );
-
-                return;
+                bucket.income +=
+                    amount;
 
             }
 
-
-            if (!category) {
-
-                alert(
-                    "Sélectionne une catégorie."
-                );
-
-                return;
-
-            }
-
-
-            if (!date) {
-
-                alert(
-                    "Sélectionne une date."
-                );
-
-                return;
-
-            }
-
-
-            /*
-               Création de la dépense
-            */
-
-            const expense = {
-
-                id:
-                    Date.now(),
-
-                type:
-                    "expense",
-
-                amount:
-                    amount,
-
-                category:
-                    category,
-
-                date:
-                    date,
-
-                note:
-                    note,
-
-                createdAt:
-                    new Date().toISOString()
-
-            };
-
-
-            /*
-               Ajouter aux données existantes
-            */
 
             if (
-                !Array.isArray(
-                    appData.transactions
+                transaction.type ===
+                "expense"
+            ) {
+
+                bucket.expense +=
+                    amount;
+
+            }
+
+        }
+    );
+
+
+    appData.savings.forEach(
+        saving => {
+
+            if (
+                !map.has(
+                    saving.date
                 )
             ) {
 
-                appData.transactions = [];
+                return;
 
             }
 
 
-            appData.transactions.push(
-                expense
-            );
+            const bucket =
+                map.get(
+                    saving.date
+                );
 
 
-            /*
-               Sauvegarder
-            */
-
-            saveData();
-
-
-            /*
-               Mettre à jour l'application
-            */
-
-            closeExpenseModal();
-
-
-            /*
-               Rafraîchir les éléments
-               existants du Dashboard
-            */
-
-            if (
-                typeof updateDashboard ===
-                "function"
-            ) {
-
-                updateDashboard();
-
-            }
-
-
-            if (
-                typeof updateFinancialScore ===
-                "function"
-            ) {
-
-                updateFinancialScore();
-
-            }
-
-
-            if (
-                typeof renderFinancialChart ===
-                "function"
-            ) {
-
-                renderFinancialChart();
-
-            }
-
-
-            /*
-               Message de confirmation
-            */
-
-            alert(
-                "Dépense enregistrée."
-            );
+            bucket.saving +=
+                Number(
+                    saving.amount
+                ) || 0;
 
         }
     );
+
+
+    /*
+       S'il n'existe aucune donnée
+       dans la période, le graphique
+       reste vide.
+    */
+
+    const hasData =
+        buckets.some(
+            bucket =>
+                bucket.income > 0 ||
+                bucket.expense > 0 ||
+                bucket.saving > 0
+        );
+
+
+    return hasData
+        ? buckets
+        : [];
 
 }
 
-/* =========================================
-   HISTORIQUE DES TRANSACTIONS
-========================================= */
 
-function renderHistory(filter = "all") {
+function toISODate(date) {
 
-    const historyList =
-        document.getElementById("historyList");
-
-    const incomeTotal =
-        document.getElementById("historyIncomeTotal");
-
-    const expenseTotal =
-        document.getElementById("historyExpenseTotal");
-
-    const balance =
-        document.getElementById("historyBalance");
+    const year =
+        date.getFullYear();
 
 
-    if (!historyList) {
-        return;
-    }
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
 
 
-    /*
-       On utilise uniquement les transactions
-       réellement enregistrées.
-    */
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
 
-    const transactions =
-        Array.isArray(appData.transactions)
-            ? appData.transactions
-            : [];
 
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function createChartLabels(
+    data
+) {
 
     /*
-       Calcul des totaux réels
+       Pour éviter de surcharger
+       le graphique sur 3M/6M/1AN,
+       on affiche quelques repères.
     */
 
-    let totalIncome = 0;
-    let totalExpense = 0;
+    if (!data.length) {
 
-
-    transactions.forEach(transaction => {
-
-        const amount =
-            Number(transaction.amount) || 0;
-
-
-        if (transaction.type === "income") {
-
-            totalIncome += amount;
-
-        }
-
-
-        if (transaction.type === "expense") {
-
-            totalExpense += amount;
-
-        }
-
-    });
-
-
-    /*
-       Mise à jour du résumé
-    */
-
-    if (incomeTotal) {
-
-        incomeTotal.textContent =
-            formatMoney(totalIncome);
+        return "";
 
     }
 
 
-    if (expenseTotal) {
-
-        expenseTotal.textContent =
-            formatMoney(totalExpense);
-
-    }
+    const maxLabels =
+        7;
 
 
-    if (balance) {
-
-        balance.textContent =
-            formatMoney(
-                totalIncome - totalExpense
-            );
-
-    }
-
-
-    /*
-       Filtrage
-    */
-
-    let filteredTransactions =
-        transactions.filter(transaction => {
-
-            if (filter === "all") {
-                return true;
-            }
-
-            return transaction.type === filter;
-
-        });
+    const step =
+        Math.max(
+            1,
+            Math.ceil(
+                data.length /
+                maxLabels
+            )
+        );
 
 
-    /*
-       Plus récentes en premier
-    */
+    return data
 
-    filteredTransactions.sort(
-        (a, b) => {
+        .filter(
+            (point, index) =>
 
-            return (
-                new Date(b.date) -
-                new Date(a.date)
-            );
+                index % step === 0 ||
+                index ===
+                    data.length - 1
+        )
 
-        }
-    );
+        .map(
+            point => `
 
-
-    /*
-       Aucune transaction
-    */
-
-    if (
-        filteredTransactions.length === 0
-    ) {
-
-        historyList.innerHTML = `
-            <div class="history-empty">
-                <strong>Aucune transaction</strong>
                 <span>
-                    Aucune opération enregistrée pour le moment.
-                </span>
-            </div>
-        `;
-
-        return;
-
-    }
-
-
-    /*
-       Affichage des transactions
-    */
-
-    historyList.innerHTML =
-        filteredTransactions.map(
-            transaction => {
-
-                const amount =
-                    Number(transaction.amount) || 0;
-
-
-                const isIncome =
-                    transaction.type === "income";
-
-
-                const typeClass =
-                    isIncome
-                        ? "history-income"
-                        : "history-expense";
-
-
-                const sign =
-                    isIncome ? "+" : "-";
-
-
-                const title =
-                    isIncome
-                        ? (
-                            transaction.source ||
-                            transaction.category ||
-                            "Revenu"
+                    ${escapeHTML(
+                        formatShortDate(
+                            point.date
                         )
-                        : (
-                            transaction.category ||
-                            "Dépense"
-                        );
+                    )}
+                </span>
 
+            `
+        )
 
-                const description =
-                    transaction.note ||
-                    "";
-
-
-                const formattedDate =
-                    formatHistoryDate(
-                        transaction.date
-                    );
-
-
-                return `
-                    <div class="history-item ${typeClass}">
-
-                        <div class="history-item-info">
-
-                            <strong>
-                                ${escapeHistoryText(title)}
-                            </strong>
-
-                            <span>
-                                ${formattedDate}
-                            </span>
-
-                            ${
-                                description
-                                    ? `
-                                        <small>
-                                            ${escapeHistoryText(description)}
-                                        </small>
-                                      `
-                                    : ""
-                            }
-
-                        </div>
-
-
-                        <strong class="history-amount">
-                            ${sign}${formatMoney(amount)}
-                        </strong>
-
-                    </div>
-                `;
-
-            }
-        ).join("");
+        .join("");
 
 }
 
 
-/* =========================================
-   FORMATAGE MONÉTAIRE
-========================================= */
-
-function formatMoney(amount) {
-
-    return (
-        Number(amount) || 0
-    ).toLocaleString(
-        "fr-FR"
-    ) + " F";
-
-}
-
-
-/* =========================================
-   FORMATAGE DATE HISTORIQUE
-========================================= */
-
-function formatHistoryDate(dateValue) {
-
-    if (!dateValue) {
-        return "Date inconnue";
-    }
-
+function formatShortDate(
+    dateValue
+) {
 
     const date =
-        new Date(dateValue);
+        new Date(
+            dateValue +
+            "T00:00:00"
+        );
 
 
-    if (isNaN(date.getTime())) {
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
         return dateValue;
+
     }
 
 
     return date.toLocaleDateString(
         "fr-FR",
         {
+
             day: "2-digit",
-            month: "long",
-            year: "numeric"
+
+            month: "2-digit"
+
         }
     );
 
 }
 
 
-/* =========================================
-   PROTECTION DU TEXTE AFFICHÉ
-========================================= */
+/* =========================================================
+   22. NAVIGATION MOBILE
+========================================================= */
 
-function escapeHistoryText(value) {
+function initializeMobileMenu() {
 
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const mobileButton =
+        document.querySelector(
+            ".mobile-menu"
+        );
+
+
+    const sidebar =
+        document.querySelector(
+            ".sidebar"
+        );
+
+
+    if (
+        !mobileButton ||
+        !sidebar
+    ) {
+
+        return;
+
+    }
+
+
+    mobileButton.addEventListener(
+        "click",
+        () => {
+
+            sidebar.classList.toggle(
+                "mobile-open"
+            );
+
+        }
+    );
 
 }
 
 
-/* =========================================
-   FILTRES HISTORIQUE
-========================================= */
+/* =========================================================
+   23. FERMETURE AVEC ESC
+========================================================= */
 
-function initializeHistory() {
+function initializeEscapeKey() {
 
-    const filterButtons =
-        document.querySelectorAll(
-            ".history-filter"
-        );
+    document.addEventListener(
+        "keydown",
+        event => {
 
+            if (
+                event.key !==
+                "Escape"
+            ) {
 
-    filterButtons.forEach(button => {
-
-        button.addEventListener(
-            "click",
-            function() {
-
-                filterButtons.forEach(
-                    item => {
-                        item.classList.remove(
-                            "active"
-                        );
-                    }
-                );
-
-
-                this.classList.add(
-                    "active"
-                );
-
-
-                const filter =
-                    this.dataset.historyFilter;
-
-
-                renderHistory(filter);
+                return;
 
             }
-        );
-
-    });
 
 
-    renderHistory("all");
-
-}
-
-
-
-    /* =========================
-       AFFICHER DASHBOARD
-    ========================= */
-
-    dashboardButton.addEventListener(
-        "click",
-        function(event) {
-
-            event.preventDefault();
-
-            dashboard.style.display = "";
-
-            history.style.display = "none";
-
-
-            dashboardButton.classList.add(
-                "active"
-            );
-
-            historyButton.classList.remove(
-                "active"
-            );
+            document
+                .querySelectorAll(
+                    ".modal-overlay.show"
+                )
+                .forEach(
+                    modal =>
+                        closeModal(modal)
+                );
 
         }
     );
 
+}
 
-    /* =========================
-       AFFICHER HISTORIQUE
-    ========================= */
 
-    historyButton.addEventListener(
+/* =========================================================
+   24. NOTIFICATIONS
+========================================================= */
+
+function initializeNotifications() {
+
+    const button =
+        document.querySelector(
+            ".notification-button"
+        );
+
+
+    if (!button) {
+
+        return;
+
+    }
+
+
+    button.addEventListener(
         "click",
-        function(event) {
+        () => {
 
-            event.preventDefault();
-
-            dashboard.style.display = "none";
-
-            history.style.display = "block";
+            updateAlerts();
 
 
-            historyButton.classList.add(
-                "active"
-            );
+            const alertList =
+                document.getElementById(
+                    "alertList"
+                );
 
-            dashboardButton.classList.remove(
-                "active"
-            );
+
+            if (!alertList) {
+
+                return;
+
+            }
+
+
+            alertList.scrollIntoView({
+
+                behavior:
+                    "smooth",
+
+                block:
+                    "center"
+
+            });
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   25. ACTIONS RAPIDES
+========================================================= */
+
+function initializeQuickActions() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".quick-action"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            const text =
+                button.textContent
+                    .toLowerCase();
 
 
             /*
-               Actualiser les données
+               Ajouter une entrée
+               et dépense sont déjà
+               connectés dans leurs
+               fonctions respectives.
             */
 
+
             if (
-                typeof renderHistory ===
-                "function"
+                text.includes(
+                    "ajouter une épargne"
+                )
             ) {
 
-                renderHistory("all");
+                button.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        showSavingsComingSoon();
+
+                    }
+                );
+
+            }
+
+
+            if (
+                text.includes(
+                    "opération trading"
+                )
+            ) {
+
+                button.addEventListener(
+                    "click",
+                    event => {
+
+                        event.preventDefault();
+
+                        showTradingComingSoon();
+
+                    }
+                );
 
             }
 
         }
     );
+
+}
+
+
+function showSavingsComingSoon() {
+
+    alert(
+        "La saisie de l'épargne sera ajoutée dans la prochaine étape."
+    );
+
+}
+
+
+function showTradingComingSoon() {
+
+    alert(
+        "La saisie des opérations de trading sera ajoutée dans la prochaine étape."
+    );
+
+}
+
+
+/* =========================================================
+   26. INITIALISATION UNIQUE
+========================================================= */
+
+function initApp() {
+
+    console.log(
+        "Million Tracker chargé."
+    );
+
+
+    updateCurrentDate();
+
+
+    initializeIncomeModal();
+
+
+    initializeExpenseModal();
+
+
+    initializeHistory();
+
+
+    initializeNavigation();
+
+
+    initializeChart();
+
+
+    initializeMobileMenu();
+
+
+    initializeEscapeKey();
+
+
+    initializeNotifications();
+
+
+    initializeQuickActions();
 
 
     /*
        État initial :
-       Dashboard visible,
-       Historique caché.
+       Dashboard visible.
     */
 
-    history.style.display = "none";
+    showView(
+        "dashboard"
+    );
+
+
+    updateDashboard();
 
 }
+
+
+/* =========================================================
+   27. LANCEMENT
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initApp
+);
