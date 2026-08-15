@@ -2207,8 +2207,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initializeHistory();
 
-    initializeMainNavigation();
-
 });
 
 /* =========================================
