@@ -3,6 +3,10 @@
    Conçu pour la structure actuelle de index.html
 ========================================================= */
 
+body {
+    background: red !important;
+}
+
 :root{
     --bg:#060806;
     --bg2:#090c09;
@@ -774,8 +778,4 @@ a{text-decoration:none;color:inherit}
     .modal{padding:22px}
     .form-actions{flex-direction:column-reverse}
     .cancel-button,.submit-button{width:100%}
-}
-
-body {
-    background: red !important;
 }
