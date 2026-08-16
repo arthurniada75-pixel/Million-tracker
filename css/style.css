@@ -775,3 +775,7 @@ a{text-decoration:none;color:inherit}
     .form-actions{flex-direction:column-reverse}
     .cancel-button,.submit-button{width:100%}
 }
+
+body {
+    background: red !important;
+}
