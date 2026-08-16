@@ -1,1090 +1,1858 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Million Tracker | Dashboard</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="css/style.css">
+    <title>Million Tracker</title>
+
 </head>
+
 
 <body>
 
-    <!-- =========================
-         SIDEBAR
-    ========================== -->
 
-    <aside class="sidebar">
+    <!-- =====================================================
+         APPLICATION
+    ====================================================== -->
 
-        <div class="brand">
-            <div class="brand-icon">M</div>
-
-            <div>
-                <h1>MILLION</h1>
-                <span>TRACKER</span>
-            </div>
-        </div>
+    <div id="app">
 
 
-        <nav class="navigation">
+        <!-- =================================================
+             SIDEBAR
+        ================================================== -->
 
-            <div class="nav-section">
-                <span class="section-title">PRINCIPAL</span>
+        <aside class="sidebar">
 
-               <a href="#" class="nav-item active" id="openDashboard">
-    <span class="nav-icon">◉</span>
-    <span>Dashboard</span>
-</a>
+            <div class="brand">
 
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">＋</span>
-                    <span>Ajouter une entrée</span>
-                </a>
-
-               <a href="#" class="nav-item" id="openExpenseModal">
-    <span class="nav-icon">−</span>
-    <span>Ajouter une dépense</span>
-</a>
-            </div>
-
-
-            <div class="nav-section">
-
-                <span class="section-title">FINANCES</span>
-
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">◈</span>
-                    <span>Épargne</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">◇</span>
-                    <span>Trading</span>
-                </a>
-
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">▣</span>
-                    <span>Statistiques</span>
-                </a>
-
-            </div>
-
-
-            <div class="nav-section">
-
-                <span class="section-title">OBJECTIF</span>
-
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">◎</span>
-                    <span>Objectif 1M</span>
-                </a>
-
-            </div>
-
-
-            <div class="nav-section">
-
-                <span class="section-title">DONNÉES</span>
-
-               <a href="#" class="nav-item" id="openHistory">
-    <span class="nav-icon">≡</span>
-    <span>Historique</span>
-</a>
-                <a href="#" class="nav-item">
-                    <span class="nav-icon">⚙</span>
-                    <span>Paramètres</span>
-                </a>
-
-            </div>
-
-        </nav>
-
-
-        <!-- OBJECTIF SIDEBAR -->
-
-        <div class="sidebar-goal">
-
-            <span class="goal-label">OBJECTIF</span>
-
-            <strong>1 000 000 F</strong>
-
-            <div class="mini-progress">
-               <div
-    class="mini-progress-fill"
-    id="sidebarGoalProgress"
-></div>
-            </div>
-
-            <div class="goal-percentage" id="sidebarGoalPercent">
-    0 %
-</div>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =========================
-         CONTENU PRINCIPAL
-    ========================== -->
-
-    <main class="main-content">
-
-        <!-- HEADER -->
-
-        <header class="topbar">
-
-            <div class="mobile-menu">
-                ☰
-            </div>
-
-            <div class="topbar-spacer"></div>
-
-            <button class="notification-button">
-                🔔
-            </button>
-
-            <div class="profile">
-                <div class="profile-avatar">
-                    A
+                <div class="brand-logo">
+                    M
                 </div>
 
-                <div class="profile-info">
-                    <strong>Arthur</strong>
-                    <span>Administrateur</span>
-                </div>
-            </div>
+                <div class="brand-text">
 
-        </header>
+                    <strong>
+                        Million Tracker
+                    </strong>
 
-
-        <!-- DASHBOARD -->
-
-        <section class="dashboard">
-
-            <div class="page-heading">
-
-                <div>
-                    <span class="eyebrow">TABLEAU DE BORD</span>
-
-                    <h2>
-                        Bonjour Arthur
-                    </h2>
-
-                    <p>
-                        Voici l'état actuel de tes finances.
-                    </p>
-                </div>
-
-               <div class="dashboard-date">
-
-    <span>Aujourd'hui</span>
-
-    <strong id="currentDate"></strong>
-
-</div>
-
-            </div>
-
-
-            <!-- =========================
-                 CARTES FINANCIÈRES
-            ========================== -->
-
-            <div class="financial-cards">
-
-                <div class="financial-card">
-
-                    <div class="card-header">
-                        <span>REVENUS</span>
-                        <div class="card-icon green">
-                            ↑
-                        </div>
-                    </div>
-
-                   <strong class="card-value" id="totalIncome">
-    0 F
-</strong>
-
-                    <span class="card-change positive" id="incomeChange">
-    —
-</span>
-
-                </div>
-
-
-                <div class="financial-card">
-
-                    <div class="card-header">
-                        <span>DÉPENSES</span>
-                        <div class="card-icon red">
-                            ↓
-                        </div>
-                    </div>
-
-                    <strong class="card-value" id="totalExpenses">
-    0 F
-</strong>
-
-                    <span class="card-change negative" id="expenseChange">
-    —
-</span>
-
-                </div>
-
-
-                <div class="financial-card">
-
-                    <div class="card-header">
-                        <span>ÉPARGNE</span>
-                        <div class="card-icon green">
-                            ◈
-                        </div>
-                    </div>
-
-                   <strong class="card-value" id="totalSavings">
-    0 F
-</strong>
-
-                    <span class="card-change positive" id="savingRate">
-    —
-</span>
-
-                </div>
-
-
-                <div class="financial-card">
-
-                    <div class="card-header">
-                        <span>SOLDE DISPONIBLE</span>
-                        <div class="card-icon green">
-                            =
-                        </div>
-                    </div>
-
-                   <strong class="card-value" id="currentBalance">
-    0 F
-</strong>
-
-                    <span class="card-change neutral" id="balanceStatus">
-    —
-</span>
+                    <span>
+                        Gestion financière
+                    </span>
 
                 </div>
 
             </div>
 
 
-            <!-- =========================
-                 OBJECTIF 1 MILLION
-            ========================== -->
+            <!-- MENU PRINCIPAL -->
 
-            <div class="goal-card">
+            <nav class="sidebar-nav">
 
-                <div class="goal-card-top">
 
-                    <div>
-                        <span class="eyebrow">
-                            OBJECTIF FINANCIER
-                        </span>
-
-                        <h3>
-                            1 000 000 F
-                        </h3>
-
-                        <p>
-                            Construire progressivement ton premier million.
-                        </p>
-                    </div>
-
-                    <div class="goal-percent" id="goalPercent">
-    0 %
-</div>
-
-                </div>
-
-
-                <div class="large-progress">
-
-                   <div
-    class="large-progress-fill"
-    id="goalProgressBar"
-></div>
-
-                </div>
-
-
-                <div class="goal-stats">
-
-                    <div>
-                        <span>Épargne actuelle</span>
-                        <strong id="goalSaved">
-    0 F
-</strong>
-                    </div>
-
-                    <div>
-                        <span>Montant restant</span>
-                        <strong id="goalRemaining">
-    1 000 000 F
-</strong>
-                    </div>
-
-                    <div>
-                        <span>Moyenne / semaine</span>
-                        <strong id="weeklyAverage">
-    —
-</strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- =========================
-                 GRAPHIQUE + SCORE
-            ========================== -->
-
-            <div class="dashboard-grid">
-
-                <div class="chart-card">
-
-                    <div class="panel-header">
-
-                        <div>
-                            <span class="eyebrow">
-                                ANALYSE
-                            </span>
-
-                            <h3>
-                                Évolution financière
-                            </h3>
-                        </div>
-
-                        <div class="period-buttons">
-
-                            <button class="period-button active" data-period="7">
-    7J
-</button>
-
-<button class="period-button" data-period="30">
-    30J
-</button>
-
-<button class="period-button" data-period="3m">
-    3M
-</button>
-
-<button class="period-button" data-period="6m">
-    6M
-</button>
-
-<button class="period-button" data-period="1y">
-    1AN
-</button>
-
-                        </div>
-
-                    </div>
-
-
-                   <div class="chart-placeholder" id="financialChart">
-
-    <div class="chart-empty" id="chartEmpty">
-
-        <span>Aucune donnée suffisante</span>
-
-        <small>
-            Enregistre plusieurs opérations pour voir ton évolution.
-        </small>
-
-    </div>
-
-    <svg
-        id="financialChartSvg"
-        class="financial-chart-svg"
-        viewBox="0 0 800 300"
-        preserveAspectRatio="none"
-    >
-
-        <g id="chartGrid"></g>
-
-        <polyline
-            id="incomeLine"
-            class="chart-svg-line chart-income"
-            points=""
-        />
-
-        <polyline
-            id="expenseLine"
-            class="chart-svg-line chart-expense"
-            points=""
-        />
-
-        <polyline
-            id="savingLine"
-            class="chart-svg-line chart-saving"
-            points=""
-        />
-
-        <g id="chartPoints"></g>
-
-    </svg>
-
-    <div
-        class="chart-labels"
-        id="chartLabels"
-    ></div>
-
-</div>
-
-                    <div class="chart-legend">
-
-                        <span>
-                            <i class="legend-green"></i>
-                            Revenus
-                        </span>
-
-                        <span>
-                            <i class="legend-red"></i>
-                            Dépenses
-                        </span>
-
-                        <span>
-                            <i class="legend-light"></i>
-                            Épargne
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SCORE -->
-
-                <div class="score-card">
-
-                    <div class="panel-header">
-
-                        <div>
-                            <span class="eyebrow">
-                                PERFORMANCE
-                            </span>
-
-                            <h3>
-                                Score financier
-                            </h3>
-                        </div>
-
-                    </div>
-
-
-                   <div class="score-circle">
-
-    <div>
-        <strong id="financialScore">—</strong>
-        <span>/100</span>
-    </div>
-
-</div>
-
-<div class="score-status" id="scoreStatus">
-    Pas encore assez de données
-</div>
-
-
-               <div class="score-details">
-
-    <div>
-        <span>Épargne</span>
-        <strong id="scoreSavings">—</strong>
-    </div>
-
-    <div>
-        <span>Dépenses</span>
-        <strong id="scoreExpenses">—</strong>
-    </div>
-
-    <div>
-        <span>Business</span>
-        <strong id="scoreBusiness">—</strong>
-    </div>
-
-    <div>
-        <span>Trading</span>
-        <strong id="scoreTrading">—</strong>
-    </div>
-
-    <div>
-        <span>Régularité</span>
-        <strong id="scoreRegularity">—</strong>
-    </div>
-
-</div>
-
-                </div>
-
-            </div>
-
-
-            <!-- =========================
-                 ALERTES
-            ========================== -->
-
-            <div class="alerts-card">
-
-                <div class="panel-header">
-
-                    <div>
-                        <span class="eyebrow">
-                            SURVEILLANCE
-                        </span>
-
-                        <h3>
-                            À surveiller
-                        </h3>
-                    </div>
-
-                </div>
-
-
-               <div class="alert-list" id="alertList">
-
-    <div class="alert-item success">
-
-        <div class="alert-icon">
-            ✓
-        </div>
-
-        <div>
-
-            <strong>
-                Aucune alerte
-            </strong>
-
-            <p>
-                Les alertes apparaîtront automatiquement
-                lorsque suffisamment de données seront disponibles.
-            </p>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-            <!-- =========================
-                 ACTIONS RAPIDES
-            ========================== -->
-
-            <div class="quick-actions">
-
-                <button class="quick-action green-action">
-
-                    <span>＋</span>
-
-                    <div>
-                        <strong>
-                            Ajouter une entrée
-                        </strong>
-
-                        <small>
-                            Enregistrer un revenu
-                        </small>
-                    </div>
-
-                </button>
-
-
-                <button class="quick-action red-action">
-
-                    <span>−</span>
-
-                    <div>
-                        <strong>
-                            Ajouter une dépense
-                        </strong>
-
-                        <small>
-                            Enregistrer une sortie
-                        </small>
-                    </div>
-
-                </button>
-
-
-                <button class="quick-action">
-
-                    <span>◈</span>
-
-                    <div>
-                        <strong>
-                            Ajouter une épargne
-                        </strong>
-
-                        <small>
-                            Mettre à jour ton objectif
-                        </small>
-                    </div>
-
-                </button>
-
-
-                <button class="quick-action">
-
-                    <span>◇</span>
-
-                    <div>
-                        <strong>
-                            Opération trading
-                        </strong>
-
-                        <small>
-                            Gain ou perte
-                        </small>
-                    </div>
-
-                </button>
-
-            </div>
-
-        </section>
-
-    </main>
-
-<!-- =========================
-     VUE HISTORIQUE
-========================== -->
-
-<section class="dashboard-section history-view" id="historyView">
-
-    <div class="section-header">
-
-        <div>
-            <span class="eyebrow">
-                TRANSACTIONS
-            </span>
-
-            <h2>
-                Historique
-            </h2>
-
-            <p>
-                Toutes tes opérations enregistrées.
-            </p>
-        </div>
-
-    </div>
-
-
-    <!-- FILTRES -->
-
-    <div class="history-filters">
-
-        <button
-            type="button"
-            class="history-filter active"
-            data-history-filter="all"
-        >
-            Toutes
-        </button>
-
-        <button
-            type="button"
-            class="history-filter"
-            data-history-filter="income"
-        >
-            Revenus
-        </button>
-
-        <button
-            type="button"
-            class="history-filter"
-            data-history-filter="expense"
-        >
-            Dépenses
-        </button>
-
-    </div>
-
-
-    <!-- LISTE DES TRANSACTIONS -->
-
-    <div
-        class="history-list"
-        id="historyList"
-    >
-    </div>
-
-
-    <!-- RÉSUMÉ -->
-
-    <div class="history-summary">
-
-        <div class="history-summary-card">
-
-            <span>
-                Revenus
-            </span>
-
-            <strong id="historyIncomeTotal">
-                0 F
-            </strong>
-
-        </div>
-
-
-        <div class="history-summary-card">
-
-            <span>
-                Dépenses
-            </span>
-
-            <strong id="historyExpenseTotal">
-                0 F
-            </strong>
-
-        </div>
-
-
-        <div class="history-summary-card">
-
-            <span>
-                Solde
-            </span>
-
-            <strong id="historyBalance">
-                0 F
-            </strong>
-
-        </div>
-
-    </div>
-
-</section>
-    
-    <!-- =========================
-     MODAL AJOUTER UNE ENTRÉE
-========================== -->
-
-<div class="modal-overlay" id="incomeModal">
-
-    <div class="modal">
-
-        <button class="modal-close" id="closeIncomeModal">
-            ×
-        </button>
-
-        <div class="modal-header">
-
-            <span class="eyebrow">
-                NOUVEL ENCAISSEMENT
-            </span>
-
-            <h2>
-                Ajouter une entrée
-            </h2>
-
-            <p>
-                Enregistre l'argent que tu viens d'encaisser.
-            </p>
-
-        </div>
-
-
-        <form id="incomeForm">
-
-            <div class="form-group">
-
-                <label for="incomeAmount">
-                    Montant
-                </label>
-
-                <div class="amount-input">
-
-                    <input
-                        type="number"
-                        id="incomeAmount"
-                        placeholder="Ex : 20000"
-                        min="1"
-                        required
-                    >
-
-                    <span>FCFA</span>
-
-                </div>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="incomeSource">
-                    Source du revenu
-                </label>
-
-                <input
-                    type="text"
-                    id="incomeSource"
-                    placeholder="Ex : Montage vidéo"
-                    required
+                <a
+                    href="#dashboard"
+                    class="nav-item"
+                    data-view="dashboard"
                 >
 
-            </div>
+                    <span class="nav-icon">
+                        ▦
+                    </span>
+
+                    <span>
+                        Dashboard
+                    </span>
+
+                </a>
 
 
-            <div class="form-group">
-
-                <label for="incomeCategory">
-                    Catégorie
-                </label>
-
-                <select id="incomeCategory">
-
-                    <option value="Business">
-                        Business
-                    </option>
-
-                    <option value="Client">
-                        Client
-                    </option>
-
-                    <option value="Autre">
-                        Autre
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="incomeDate">
-                    Date
-                </label>
-
-                <input
-                    type="date"
-                    id="incomeDate"
-                    required
+                <a
+                    href="#income"
+                    class="nav-item"
+                    data-view="income"
                 >
 
-            </div>
+                    <span class="nav-icon">
+                        +
+                    </span>
+
+                    <span>
+                        Ajouter une entrée
+                    </span>
+
+                </a>
 
 
-            <div class="form-group">
+                <a
+                    href="#expense"
+                    class="nav-item"
+                    data-view="expense"
+                >
 
-                <label for="incomeNote">
-                    Note
-                    <span>(facultatif)</span>
-                </label>
+                    <span class="nav-icon">
+                        −
+                    </span>
 
-                <textarea
-                    id="incomeNote"
-                    placeholder="Ajouter une précision..."
-                    rows="3"
-                ></textarea>
+                    <span>
+                        Ajouter une dépense
+                    </span>
 
-            </div>
+                </a>
 
 
-            <div class="saving-preview" id="savingPreview">
+                <a
+                    href="#savings"
+                    class="nav-item"
+                    data-view="savings"
+                >
+
+                    <span class="nav-icon">
+                        $
+                    </span>
+
+                    <span>
+                        Épargne
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="#trading"
+                    class="nav-item"
+                    data-view="trading"
+                >
+
+                    <span class="nav-icon">
+                        ◇
+                    </span>
+
+                    <span>
+                        Trading
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="#statistics"
+                    class="nav-item"
+                    data-view="statistics"
+                >
+
+                    <span class="nav-icon">
+                        ◫
+                    </span>
+
+                    <span>
+                        Statistiques
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="#goal"
+                    class="nav-item"
+                    data-view="goal"
+                >
+
+                    <span class="nav-icon">
+                        ◎
+                    </span>
+
+                    <span>
+                        Objectif 1M
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="#history"
+                    class="nav-item"
+                    data-view="history"
+                >
+
+                    <span class="nav-icon">
+                        ≡
+                    </span>
+
+                    <span>
+                        Historique
+                    </span>
+
+                </a>
+
+
+                <a
+                    href="#settings"
+                    class="nav-item"
+                    data-view="settings"
+                >
+
+                    <span class="nav-icon">
+                        ⚙
+                    </span>
+
+                    <span>
+                        Paramètres
+                    </span>
+
+                </a>
+
+
+            </nav>
+
+
+            <!-- OBJECTIF RAPIDE -->
+
+            <div class="sidebar-goal">
 
                 <span>
-                    Épargne recommandée
+                    OBJECTIF
                 </span>
 
                 <strong>
-                    0 F
+                    1 000 000 F
                 </strong>
 
-                <small>
-                    30 % de cet encaissement
+                <div class="sidebar-goal-progress">
+
+                    <div
+                        class="sidebar-goal-progress-bar"
+                        id="sidebarGoalProgress"
+                    ></div>
+
+                </div>
+
+                <small id="sidebarGoalPercent">
+                    0 %
                 </small>
 
             </div>
 
 
-            <div class="form-actions">
+            <!-- BAS DE SIDEBAR -->
 
-                <button
-                    type="button"
-                    class="cancel-button"
-                    id="cancelIncome"
-                >
-                    Annuler
-                </button>
+            <div class="sidebar-footer">
 
-                <button
-                    type="submit"
-                    class="submit-button"
-                >
-                    Enregistrer
-                </button>
+                <span>
+                    Million Tracker
+                </span>
+
+                <small>
+                    Gestion personnelle
+                </small>
 
             </div>
 
-        </form>
 
-    </div>
-
-</div>
-
-    <!-- =========================
-     MODAL AJOUTER UNE DÉPENSE
-========================== -->
-
-<div class="modal-overlay" id="expenseModal">
-
-    <div class="modal">
-
-        <button class="modal-close" id="closeExpenseModal">
-            ×
-        </button>
-
-        <div class="modal-header">
-
-            <span class="eyebrow">
-                NOUVELLE DÉPENSE
-            </span>
-
-            <h2>
-                Ajouter une dépense
-            </h2>
-
-            <p>
-                Enregistre l'argent que tu viens de dépenser.
-            </p>
-
-        </div>
+        </aside>
 
 
-        <form id="expenseForm">
 
-            <div class="form-group">
+        <!-- =================================================
+             CONTENU PRINCIPAL
+        ================================================== -->
 
-                <label for="expenseAmount">
-                    Montant
-                </label>
+        <main class="main-content">
 
-                <div class="amount-input">
 
-                    <input
-                        type="number"
-                        id="expenseAmount"
-                        placeholder="Montant réel"
-                        min="1"
-                        required
-                    >
+            <!-- =================================================
+                 DASHBOARD
+            ================================================== -->
 
-                    <span>FCFA</span>
+            <section
+                class="view"
+                id="dashboardView"
+                data-view-section="dashboard"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            TABLEAU DE BORD
+                        </span>
+
+                        <h1>
+                            Bonjour
+                        </h1>
+
+                        <p>
+                            Voici l'état actuel de tes finances.
+                        </p>
+
+                    </div>
+
+
+                    <div class="current-date">
+
+                        <span>
+                            Aujourd'hui
+                        </span>
+
+                        <strong id="currentDate">
+                            —
+                        </strong>
+
+                    </div>
+
+                </header>
+
+
+                <!-- CARTES PRINCIPALES -->
+
+                <div class="dashboard-cards">
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Revenus
+                        </span>
+
+                        <strong id="dashboardIncome">
+                            0 F
+                        </strong>
+
+                        <small>
+                            Total enregistré
+                        </small>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Dépenses
+                        </span>
+
+                        <strong id="dashboardExpenses">
+                            0 F
+                        </strong>
+
+                        <small>
+                            Total enregistré
+                        </small>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Épargne
+                        </span>
+
+                        <strong id="dashboardSavings">
+                            0 F
+                        </strong>
+
+                        <small>
+                            Total épargné
+                        </small>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Solde disponible
+                        </span>
+
+                        <strong id="dashboardBalance">
+                            0 F
+                        </strong>
+
+                        <small>
+                            Revenus − dépenses − épargne
+                        </small>
+
+                    </article>
+
 
                 </div>
 
-            </div>
+
+                <!-- OBJECTIF -->
+
+                <div class="dashboard-grid">
 
 
-            <div class="form-group">
+                    <article class="dashboard-card goal-card">
 
-                <label for="expenseCategory">
-                    Catégorie
-                </label>
+                        <div class="card-header">
 
-                <select
-                    id="expenseCategory"
-                    required
-                >
+                            <div>
 
-                    <option value="" selected disabled>
-                        Sélectionner une catégorie
-                    </option>
+                                <span class="eyebrow">
+                                    OBJECTIF
+                                </span>
 
-                    <option value="Nourriture">
-                        Nourriture
-                    </option>
+                                <h2>
+                                    Objectif financier
+                                </h2>
 
-                    <option value="Famille">
-                        Famille
-                    </option>
+                            </div>
 
-                    <option value="Trading">
-                        Trading
-                    </option>
-
-                    <option value="Achats personnels">
-                        Achats personnels
-                    </option>
-
-                    <option value="Autres dépenses">
-                        Autres dépenses
-                    </option>
-
-                </select>
-
-            </div>
+                        </div>
 
 
-            <div class="form-group">
+                        <div class="goal-main">
 
-                <label for="expenseDate">
-                    Date
-                </label>
+                            <strong id="dashboardGoalAmount">
+                                0 F
+                            </strong>
 
-                <input
-                    type="date"
-                    id="expenseDate"
-                    required
-                >
+                            <span>
+                                sur 1 000 000 F
+                            </span>
 
-            </div>
+                        </div>
 
 
-            <div class="form-group">
+                        <div class="progress-bar">
 
-                <label for="expenseNote">
-                    Description
-                    <span>(facultatif)</span>
-                </label>
+                            <div
+                                class="progress-fill"
+                                id="dashboardGoalProgress"
+                            ></div>
 
-                <textarea
-                    id="expenseNote"
-                    placeholder="Expliquer cette dépense..."
-                    rows="3"
-                ></textarea>
-
-            </div>
+                        </div>
 
 
-            <div class="form-actions">
+                        <div class="goal-footer">
 
-                <button
-                    type="button"
-                    class="cancel-button"
-                    id="cancelExpense"
-                >
-                    Annuler
-                </button>
+                            <span>
+                                Progression
+                            </span>
 
-                <button
-                    type="submit"
-                    class="submit-button"
-                >
-                    Enregistrer
-                </button>
+                            <strong id="dashboardGoalPercent">
+                                0 %
+                            </strong>
 
-            </div>
+                        </div>
 
-        </form>
+                    </article>
+
+
+
+                    <!-- SCORE -->
+
+                    <article class="dashboard-card score-card">
+
+                        <div class="card-header">
+
+                            <div>
+
+                                <span class="eyebrow">
+                                    PERFORMANCE
+                                </span>
+
+                                <h2>
+                                    Score financier
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="score-circle">
+
+                            <strong id="financialScore">
+                                —
+                            </strong>
+
+                            <span>
+                                /100
+                            </span>
+
+                        </div>
+
+
+                        <p id="scoreStatus">
+                            Aucune donnée suffisante
+                        </p>
+
+
+                        <div class="score-details">
+
+
+                            <div>
+
+                                <span>
+                                    Épargne
+                                </span>
+
+                                <strong id="scoreSavings">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Dépenses
+                                </span>
+
+                                <strong id="scoreExpenses">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Business
+                                </span>
+
+                                <strong id="scoreBusiness">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Trading
+                                </span>
+
+                                <strong id="scoreTrading">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                            <div>
+
+                                <span>
+                                    Régularité
+                                </span>
+
+                                <strong id="scoreRegularity">
+                                    —
+                                </strong>
+
+                            </div>
+
+
+                        </div>
+
+                    </article>
+
+
+                </div>
+
+
+                <!-- ÉVOLUTION FINANCIÈRE -->
+
+                <article class="dashboard-card financial-chart-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                ANALYSE
+                            </span>
+
+                            <h2>
+                                Évolution financière
+                            </h2>
+
+                        </div>
+
+
+                        <div class="period-buttons">
+
+                            <button
+                                type="button"
+                                class="period-button active"
+                                data-period="7"
+                            >
+                                7J
+                            </button>
+
+                            <button
+                                type="button"
+                                class="period-button"
+                                data-period="30"
+                            >
+                                30J
+                            </button>
+
+                            <button
+                                type="button"
+                                class="period-button"
+                                data-period="3m"
+                            >
+                                3M
+                            </button>
+
+                            <button
+                                type="button"
+                                class="period-button"
+                                data-period="6m"
+                            >
+                                6M
+                            </button>
+
+                            <button
+                                type="button"
+                                class="period-button"
+                                data-period="1y"
+                            >
+                                1AN
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="financial-chart"
+                        id="financialChart"
+                    >
+
+                        <div class="chart-empty">
+
+                            <span>
+                                Aucune donnée disponible
+                            </span>
+
+                            <small>
+                                Enregistre tes premières opérations.
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="chart-legend">
+
+                        <span>
+                            <i class="legend-income"></i>
+                            Revenus
+                        </span>
+
+                        <span>
+                            <i class="legend-expense"></i>
+                            Dépenses
+                        </span>
+
+                        <span>
+                            <i class="legend-saving"></i>
+                            Épargne
+                        </span>
+
+                    </div>
+
+                </article>
+
+
+                <!-- À SURVEILLER -->
+
+                <article class="dashboard-card watch-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                ATTENTION
+                            </span>
+
+                            <h2>
+                                À surveiller
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="watch-list"
+                        id="watchList"
+                    >
+
+                        <div class="empty-state">
+
+                            <strong>
+                                Aucune alerte
+                            </strong>
+
+                            <span>
+                                Les alertes apparaîtront lorsque suffisamment de données seront disponibles.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+            </section>
+
+
+
+            <!-- =================================================
+                 AJOUTER UNE ENTRÉE
+            ================================================== -->
+
+            <section
+                class="view"
+                id="incomeView"
+                data-view-section="income"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            REVENUS
+                        </span>
+
+                        <h1>
+                            Ajouter une entrée
+                        </h1>
+
+                        <p>
+                            Enregistre chaque encaissement réel.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <article class="form-card">
+
+                    <form id="incomeForm">
+
+
+                        <div class="form-group">
+
+                            <label for="incomeAmount">
+                                Montant
+                            </label>
+
+                            <div class="amount-input">
+
+                                <input
+                                    type="number"
+                                    id="incomeAmount"
+                                    min="1"
+                                    placeholder="Ex : 20000"
+                                    required
+                                >
+
+                                <span>
+                                    FCFA
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="incomeSource">
+                                Source du revenu
+                            </label>
+
+                            <input
+                                type="text"
+                                id="incomeSource"
+                                placeholder="Ex : Création d'affiche"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="incomeCategory">
+                                Catégorie
+                            </label>
+
+                            <select id="incomeCategory">
+
+                                <option value="Business">
+                                    Business
+                                </option>
+
+                                <option value="Client">
+                                    Client
+                                </option>
+
+                                <option value="Autre">
+                                    Autre
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="incomeDate">
+                                Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="incomeDate"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="incomeNote">
+                                Note
+                                <span>
+                                    (facultatif)
+                                </span>
+                            </label>
+
+                            <textarea
+                                id="incomeNote"
+                                rows="4"
+                                placeholder="Ajouter une précision..."
+                            ></textarea>
+
+                        </div>
+
+
+                        <div class="saving-preview">
+
+                            <span>
+                                Épargne recommandée
+                            </span>
+
+                            <strong id="incomeSavingPreview">
+                                0 F
+                            </strong>
+
+                            <small>
+                                30 % de cet encaissement
+                            </small>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Enregistrer l'entrée
+                        </button>
+
+
+                    </form>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 AJOUTER UNE DÉPENSE
+            ================================================== -->
+
+            <section
+                class="view"
+                id="expenseView"
+                data-view-section="expense"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            DÉPENSES
+                        </span>
+
+                        <h1>
+                            Ajouter une dépense
+                        </h1>
+
+                        <p>
+                            Enregistre chaque dépense réelle.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <article class="form-card">
+
+                    <form id="expenseForm">
+
+
+                        <div class="form-group">
+
+                            <label for="expenseAmount">
+                                Montant
+                            </label>
+
+                            <div class="amount-input">
+
+                                <input
+                                    type="number"
+                                    id="expenseAmount"
+                                    min="1"
+                                    placeholder="Ex : 10000"
+                                    required
+                                >
+
+                                <span>
+                                    FCFA
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="expenseCategory">
+                                Catégorie
+                            </label>
+
+                            <select id="expenseCategory">
+
+                                <option value="">
+                                    Sélectionner
+                                </option>
+
+                                <option value="Nourriture">
+                                    Nourriture
+                                </option>
+
+                                <option value="Famille">
+                                    Famille
+                                </option>
+
+                                <option value="Trading">
+                                    Trading
+                                </option>
+
+                                <option value="Achats personnels">
+                                    Achats personnels
+                                </option>
+
+                                <option value="Autres dépenses">
+                                    Autres dépenses
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="expenseDate">
+                                Date
+                            </label>
+
+                            <input
+                                type="date"
+                                id="expenseDate"
+                                required
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label for="expenseNote">
+                                Note
+                                <span>
+                                    (facultatif)
+                                </span>
+                            </label>
+
+                            <textarea
+                                id="expenseNote"
+                                rows="4"
+                                placeholder="Pourquoi cette dépense ?"
+                            ></textarea>
+
+                        </div>
+
+
+                        <button
+                            type="submit"
+                            class="primary-button"
+                        >
+                            Enregistrer la dépense
+                        </button>
+
+
+                    </form>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 ÉPARGNE
+            ================================================== -->
+
+            <section
+                class="view"
+                id="savingsView"
+                data-view-section="savings"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            ÉPARGNE
+                        </span>
+
+                        <h1>
+                            Mon épargne
+                        </h1>
+
+                        <p>
+                            Suis ton argent mis de côté.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <div class="section-cards">
+
+                    <article class="stat-card">
+
+                        <span>
+                            Total épargné
+                        </span>
+
+                        <strong id="savingsTotal">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Épargne recommandée
+                        </span>
+
+                        <strong id="savingsRecommended">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Taux d'épargne
+                        </span>
+
+                        <strong id="savingsRate">
+                            0 %
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+                <article class="content-card">
+
+                    <div class="card-header">
+
+                        <div>
+
+                            <span class="eyebrow">
+                                RÈGLE ACTUELLE
+                            </span>
+
+                            <h2>
+                                30 % des encaissements
+                            </h2>
+
+                        </div>
+
+                    </div>
+
+                    <p>
+                        Cette règle servira de recommandation automatique.
+                        Elle ne créera jamais une fausse épargne.
+                    </p>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 TRADING
+            ================================================== -->
+
+            <section
+                class="view"
+                id="tradingView"
+                data-view-section="trading"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            TRADING
+                        </span>
+
+                        <h1>
+                            Trading
+                        </h1>
+
+                        <p>
+                            Suis séparément tes opérations de trading.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <div class="section-cards">
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Capital dédié
+                        </span>
+
+                        <strong id="tradingCapital">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Gains
+                        </span>
+
+                        <strong id="tradingGains">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Pertes
+                        </span>
+
+                        <strong id="tradingLosses">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Résultat
+                        </span>
+
+                        <strong id="tradingResult">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                </div>
+
+
+                <article class="content-card">
+
+                    <div class="empty-state">
+
+                        <strong>
+                            Aucune opération de trading
+                        </strong>
+
+                        <span>
+                            Aucun résultat ne sera inventé.
+                        </span>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 STATISTIQUES
+            ================================================== -->
+
+            <section
+                class="view"
+                id="statisticsView"
+                data-view-section="statistics"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            ANALYSE
+                        </span>
+
+                        <h1>
+                            Statistiques
+                        </h1>
+
+                        <p>
+                            Analyse détaillée de tes finances.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <div class="statistics-filters">
+
+                    <button
+                        type="button"
+                        class="period-button active"
+                        data-stat-period="7"
+                    >
+                        7 jours
+                    </button>
+
+                    <button
+                        type="button"
+                        class="period-button"
+                        data-stat-period="30"
+                    >
+                        30 jours
+                    </button>
+
+                    <button
+                        type="button"
+                        class="period-button"
+                        data-stat-period="3m"
+                    >
+                        3 mois
+                    </button>
+
+                    <button
+                        type="button"
+                        class="period-button"
+                        data-stat-period="6m"
+                    >
+                        6 mois
+                    </button>
+
+                    <button
+                        type="button"
+                        class="period-button"
+                        data-stat-period="1y"
+                    >
+                        1 an
+                    </button>
+
+                </div>
+
+
+                <div class="statistics-grid">
+
+                    <article class="content-card">
+
+                        <h2>
+                            Revenus
+                        </h2>
+
+                        <strong id="statisticsIncome">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="content-card">
+
+                        <h2>
+                            Dépenses
+                        </h2>
+
+                        <strong id="statisticsExpenses">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="content-card">
+
+                        <h2>
+                            Épargne
+                        </h2>
+
+                        <strong id="statisticsSavings">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="content-card">
+
+                        <h2>
+                            Solde
+                        </h2>
+
+                        <strong id="statisticsBalance">
+                            0 F
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+                <article class="content-card">
+
+                    <div
+                        id="statisticsChart"
+                        class="statistics-chart"
+                    >
+
+                        <div class="empty-state">
+
+                            <strong>
+                                Aucune donnée disponible
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 OBJECTIF 1 MILLION
+            ================================================== -->
+
+            <section
+                class="view"
+                id="goalView"
+                data-view-section="goal"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            OBJECTIF
+                        </span>
+
+                        <h1>
+                            Objectif 1 000 000 F
+                        </h1>
+
+                        <p>
+                            Construis ton épargne jusqu'au premier million.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <article class="goal-large-card">
+
+                    <span>
+                        PROGRESSION
+                    </span>
+
+                    <strong id="goalSavedAmount">
+                        0 F
+                    </strong>
+
+                    <p>
+                        sur 1 000 000 F
+                    </p>
+
+
+                    <div class="progress-bar">
+
+                        <div
+                            class="progress-fill"
+                            id="goalProgress"
+                        ></div>
+
+                    </div>
+
+
+                    <div class="goal-stat-row">
+
+                        <div>
+
+                            <span>
+                                Pourcentage atteint
+                            </span>
+
+                            <strong id="goalPercent">
+                                0 %
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Reste
+                            </span>
+
+                            <strong id="goalRemaining">
+                                1 000 000 F
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <article class="content-card">
+
+                    <h2>
+                        Rythme d'épargne
+                    </h2>
+
+                    <div
+                        id="goalAnalysis"
+                        class="empty-state"
+                    >
+
+                        <strong>
+                            Pas encore assez de données
+                        </strong>
+
+                        <span>
+                            Enregistre tes premières opérations pour obtenir une analyse.
+                        </span>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 HISTORIQUE
+            ================================================== -->
+
+            <section
+                class="view"
+                id="historyView"
+                data-view-section="history"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            HISTORIQUE
+                        </span>
+
+                        <h1>
+                            Historique
+                        </h1>
+
+                        <p>
+                            Toutes tes opérations réelles au même endroit.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <div class="history-summary">
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Revenus
+                        </span>
+
+                        <strong id="historyIncomeTotal">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Dépenses
+                        </span>
+
+                        <strong id="historyExpenseTotal">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                    <article class="stat-card">
+
+                        <span>
+                            Solde
+                        </span>
+
+                        <strong id="historyBalance">
+                            0 F
+                        </strong>
+
+                    </article>
+
+
+                </div>
+
+
+                <div class="history-filters">
+
+                    <button
+                        type="button"
+                        class="history-filter active"
+                        data-history-filter="all"
+                    >
+                        Tout
+                    </button>
+
+                    <button
+                        type="button"
+                        class="history-filter"
+                        data-history-filter="income"
+                    >
+                        Revenus
+                    </button>
+
+                    <button
+                        type="button"
+                        class="history-filter"
+                        data-history-filter="expense"
+                    >
+                        Dépenses
+                    </button>
+
+                </div>
+
+
+                <article class="content-card">
+
+                    <div
+                        class="history-list"
+                        id="historyList"
+                    >
+
+                        <div class="empty-state">
+
+                            <strong>
+                                Aucun historique
+                            </strong>
+
+                            <span>
+                                Tes opérations apparaîtront ici.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+
+            <!-- =================================================
+                 PARAMÈTRES
+            ================================================== -->
+
+            <section
+                class="view"
+                id="settingsView"
+                data-view-section="settings"
+            >
+
+                <header class="page-header">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            CONFIGURATION
+                        </span>
+
+                        <h1>
+                            Paramètres
+                        </h1>
+
+                        <p>
+                            Configure ton système financier.
+                        </p>
+
+                    </div>
+
+                </header>
+
+
+                <article class="content-card">
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <strong>
+                                Objectif financier
+                            </strong>
+
+                            <span>
+                                Montant à atteindre
+                            </span>
+
+                        </div>
+
+
+                        <div class="setting-value">
+
+                            <input
+                                type="number"
+                                id="goalTarget"
+                                value="1000000"
+                                min="1"
+                            >
+
+                            <span>
+                                FCFA
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <strong>
+                                Taux d'épargne recommandé
+                            </strong>
+
+                            <span>
+                                Pourcentage conseillé sur chaque encaissement
+                            </span>
+
+                        </div>
+
+
+                        <div class="setting-value">
+
+                            <input
+                                type="number"
+                                id="savingRate"
+                                value="30"
+                                min="0"
+                                max="100"
+                            >
+
+                            <span>
+                                %
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <strong>
+                                Rappels
+                            </strong>
+
+                            <span>
+                                Recevoir un rappel pour mettre à jour tes finances
+                            </span>
+
+                        </div>
+
+
+                        <label class="toggle">
+
+                            <input
+                                type="checkbox"
+                                id="reminderEnabled"
+                            >
+
+                            <span>
+                                Activer
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div class="setting-row">
+
+                        <div>
+
+                            <strong>
+                                Fréquence du rappel
+                            </strong>
+
+                            <span>
+                                Fréquence prévue
+                            </span>
+
+                        </div>
+
+
+                        <select id="reminderFrequency">
+
+                            <option value="2">
+                                Tous les 2 jours
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="primary-button"
+                        id="saveSettings"
+                    >
+                        Enregistrer les paramètres
+                    </button>
+
+
+                </article>
+
+
+                <article class="content-card danger-zone">
+
+                    <span class="eyebrow">
+                        DONNÉES
+                    </span>
+
+                    <h2>
+                        Gestion des données
+                    </h2>
+
+                    <p>
+                        Cette zone servira à gérer les données enregistrées sur l'application.
+                    </p>
+
+
+                    <button
+                        type="button"
+                        class="danger-button"
+                        id="resetData"
+                    >
+                        Réinitialiser les données
+                    </button>
+
+                </article>
+
+            </section>
+
+
+        </main>
+
 
     </div>
 
-</div>
-
-<script src="js/app.js"></script>
 
 </body>
+
 </html>
