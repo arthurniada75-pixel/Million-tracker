@@ -19,7 +19,28 @@
   const label=t=>({income:'ENTRÉE',expense:'DÉPENSE',saving:'ÉPARGNE',trading:'TRADING'}[t]||t.toUpperCase());
   function watch(t){const box=$('#watch');let a=[];if(t.income&&t.expense>t.income)a.push(['danger','Dépenses supérieures aux revenus','Tes dépenses dépassent actuellement tes revenus.']);if(t.income&&t.saving===0)a.push(['','Épargne à renforcer','Aucune épargne n’est encore enregistrée.']);if(!a.length){box.innerHTML='<div class="empty">Aucune alerte<small>Les alertes apparaîtront lorsque suffisamment de données seront disponibles.</small></div>';return}box.innerHTML=a.map(x=>`<div class="watch-item ${x[0]}"><div><b>${x[1]}</b><p>${x[2]}</p></div></div>`).join('')}
   function periodStart(period){const d=new Date();if(period==='today')return today();if(period==='7')d.setDate(d.getDate()-6);if(period==='30')d.setDate(d.getDate()-29);if(period==='3m')d.setMonth(d.getMonth()-3);if(period==='6m')d.setMonth(d.getMonth()-6);if(period==='1y')d.setFullYear(d.getFullYear()-1);return d.toISOString().slice(0,10)}
-  function chart(){const box=$('#chart');if(!box)return;const start=periodStart(selectedPeriod);const filtered=data.transactions.filter(t=>t.date>=start&&t.date<=today());if(!filtered.length){box.innerHTML='<div class="chart-empty">Aucune donnée disponible<small>Aucune opération pour cette période.</small></div>';return}const max=Math.max(...filtered.map(t=>Math.abs(t.amount)),1);box.innerHTML='<div class="chart-bars">'+filtered.map(t=>`<i title="${label(t.type)} · ${money(t.amount)} · ${dateText(t.date)}" style="height:${Math.max(8,Math.min(95,Math.abs(t.amount)/max*85))}%" class="${t.type}"></i>`).join('')+'</div>'}
+  function chart(){
+    const box=$('#chart'); if(!box)return;
+    const end=today(), start=periodStart(selectedPeriod);
+    const filtered=data.transactions.filter(t=>t.date>=start&&t.date<=end);
+    if(!filtered.length){box.innerHTML='<div class="chart-empty">Aucune donnée disponible<small>Aucune opération pour cette période.</small></div>';return}
+    const types=['income','expense','saving','trading'];
+    const colors={income:'#19d66b',expense:'#ff5365',saving:'#cfd6d0',trading:'#f4c95d'};
+    const labels={income:'Revenus',expense:'Dépenses',saving:'Épargne',trading:'Trading'};
+    let dates=[];
+    if(selectedPeriod==='today') dates=[end];
+    else { const d=new Date(start+'T12:00:00'), e=new Date(end+'T12:00:00'); while(d<=e){dates.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+1)} }
+    const W=900,H=230,P=28;
+    const values={}; types.forEach(type=>values[type]=dates.map(date=>filtered.filter(t=>t.date===date&&t.type===type).reduce((s,t)=>s+Math.abs(Number(t.amount)||0),0)));
+    const max=Math.max(1,...types.flatMap(type=>values[type]));
+    const x=i=>dates.length===1?W/2:P+i*(W-2*P)/Math.max(1,dates.length-1);
+    const y=v=>H-P-(v/max)*(H-2*P);
+    const path=(arr)=>arr.map((v,i)=>(i?'L':'M')+x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ');
+    const grid=[0,.25,.5,.75,1].map(r=>{const yy=H-P-r*(H-2*P);return `<line x1="${P}" y1="${yy}" x2="${W-P}" y2="${yy}" stroke="rgba(255,255,255,.07)" stroke-width="1"/>`}).join('');
+    const lines=types.map(type=>`<path d="${path(values[type])}" fill="none" stroke="${colors[type]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${values[type].map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="${colors[type]}"/>`).join('')}`).join('');
+    const dateLabels=dates.length===1?`<text x="${W/2}" y="${H-5}" text-anchor="middle" fill="#59645d" font-size="10">Aujourd'hui</text>`:dates.map((d,i)=>{if(dates.length>14&&i%Math.ceil(dates.length/7)!==0)return '';return `<text x="${x(i)}" y="${H-5}" text-anchor="middle" fill="#59645d" font-size="9">${d.slice(8,10)}/${d.slice(5,7)}</text>`}).join('');
+    box.innerHTML=`<div class="chart-period-label">${selectedPeriod==='today'?"Aujourd'hui":selectedPeriod==='7'?'7 derniers jours':selectedPeriod==='30'?'30 derniers jours':selectedPeriod==='3m'?'3 derniers mois':selectedPeriod==='6m'?'6 derniers mois':'12 derniers mois'}</div><svg class="financial-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Évolution financière">${grid}${lines}${dateLabels}</svg>`;
+  }
   function escapeHtml(s){return String(s||'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
   function setTodayFields(){['incomeDate','expenseDate','savingDate','tradingDate'].forEach(id=>{const e=document.getElementById(id);if(e&&!e.value)e.value=today()});const a=$('#incomeAmount'),p=$('#incomePreview');if(a&&p)p.textContent=money((Number(a.value)||0)*.3)}
   function add(type,amount,title,category,date,note){data.transactions.push({id:Date.now()+Math.random(),type,amount:Number(amount),title,category,date,note});save();render();location.hash='dashboard';show('dashboard');alert('Opération enregistrée.')}
