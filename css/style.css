@@ -3,10 +3,6 @@
    Conçu pour la structure actuelle de index.html
 ========================================================= */
 
-body {
-    background: red !important;
-}
-
 :root{
     --bg:#060806;
     --bg2:#090c09;
